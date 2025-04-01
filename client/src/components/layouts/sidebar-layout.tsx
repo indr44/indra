@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/use-auth";
 import { 
   LayoutDashboard, 
@@ -19,6 +20,9 @@ import {
   UserCircle,
   RefreshCw, // Replaced Sync with RefreshCw
   Loader2, // Added for loading animation
+  ChevronUp,
+  Wifi,
+  WifiOff, 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -56,12 +60,24 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const [voucherStockOpen, setVoucherStockOpen] = useState(false);
+  
   // Get relevant links based on user role
   const getNavLinks = () => {
     if (mockUser.role === "owner") {
       return [
         { href: "/owner/dashboard", label: "Dasbor", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
-        { href: "/owner/voucher-stock", label: "Stok Voucher", icon: <Tags className="mr-2 h-5 w-5" /> },
+        { 
+          isSubmenu: true, 
+          label: "Stok Voucher", 
+          icon: <Tags className="mr-2 h-5 w-5" />,
+          open: voucherStockOpen,
+          toggle: () => setVoucherStockOpen(!voucherStockOpen),
+          items: [
+            { href: "/owner/voucher-stock", label: "Stok Voucher Online", icon: <Wifi className="mr-2 h-4 w-4" /> },
+            { href: "#", label: "Stok Voucher Offline", icon: <WifiOff className="mr-2 h-4 w-4" /> },
+          ]
+        },
         { href: "/owner/distribution", label: "Distribusi", icon: <Share className="mr-2 h-5 w-5" /> },
         // Additional owner links
         { href: "#", label: "Kelola Karyawan", icon: <Users className="mr-2 h-5 w-5" /> },
@@ -167,33 +183,89 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
         </div>
 
         <nav className="space-y-1">
-          {links.map((link, index) => (
-            <Link
-              key={index}
-              href={link.href}
-              onClick={() => {
-                if (link.href.startsWith("#")) {
-                  toast({
-                    title: "Segera Hadir",
-                    description: "Fitur ini sedang dalam pengembangan",
-                    variant: "default",
-                  });
-                }
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              <a
-                className={cn(
-                  "block py-2.5 px-4 rounded transition duration-200",
-                  location === link.href ? activeLinkColor : "text-white",
-                  hoverColor
-                )}
+          {links.map((link, index) => 
+            link.isSubmenu ? (
+              <Collapsible 
+                key={index}
+                open={link.open}
+                onOpenChange={link.toggle}
+                className="w-full"
               >
-                {link.icon}
-                {link.label}
-              </a>
-            </Link>
-          ))}
+                <CollapsibleTrigger asChild>
+                  <button
+                    className={cn(
+                      "flex items-center justify-between w-full py-2.5 px-4 rounded transition duration-200 text-white",
+                      hoverColor
+                    )}
+                  >
+                    <div className="flex items-center">
+                      {link.icon}
+                      {link.label}
+                    </div>
+                    {link.open ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pl-4 space-y-1 mt-1">
+                  {link.items.map((item, itemIndex) => (
+                    <Link
+                      key={`${index}-${itemIndex}`}
+                      href={item.href}
+                      onClick={() => {
+                        if (item.href.startsWith("#")) {
+                          toast({
+                            title: "Segera Hadir",
+                            description: "Fitur ini sedang dalam pengembangan",
+                            variant: "default",
+                          });
+                        }
+                      }}
+                    >
+                      <a
+                        className={cn(
+                          "block py-2 px-4 rounded transition duration-200",
+                          location === item.href ? activeLinkColor : "text-white",
+                          hoverColor
+                        )}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </a>
+                    </Link>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              <Link
+                key={index}
+                href={link.href}
+                onClick={() => {
+                  if (link.href.startsWith("#")) {
+                    toast({
+                      title: "Segera Hadir",
+                      description: "Fitur ini sedang dalam pengembangan",
+                      variant: "default",
+                    });
+                  }
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                <a
+                  className={cn(
+                    "block py-2.5 px-4 rounded transition duration-200",
+                    location === link.href ? activeLinkColor : "text-white",
+                    hoverColor
+                  )}
+                >
+                  {link.icon}
+                  {link.label}
+                </a>
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="absolute bottom-0 w-full px-4 py-4">
