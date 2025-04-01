@@ -11,6 +11,7 @@ import HomePage from "@/pages/home-page";
 // Owner pages
 import OwnerDashboard from "@/pages/owner/dashboard";
 import OwnerVoucherStock from "@/pages/owner/voucher-stock";
+import OfflineVoucherStock from "@/pages/owner/offline-voucher-stock";
 import OwnerDistribution from "@/pages/owner/distribution";
 
 // Employee pages
@@ -31,6 +32,7 @@ function Router() {
       {/* Owner routes */}
       <ProtectedRoute path="/owner/dashboard" component={OwnerDashboard} />
       <ProtectedRoute path="/owner/voucher-stock" component={OwnerVoucherStock} />
+      <ProtectedRoute path="/owner/offline-voucher-stock" component={OfflineVoucherStock} />
       <ProtectedRoute path="/owner/distribution" component={OwnerDistribution} />
       
       {/* Employee routes */}

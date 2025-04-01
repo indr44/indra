@@ -75,7 +75,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
           toggle: () => setVoucherStockOpen(!voucherStockOpen),
           items: [
             { href: "/owner/voucher-stock", label: "Stok Voucher Online", icon: <Wifi className="mr-2 h-4 w-4" /> },
-            { href: "#", label: "Stok Voucher Offline", icon: <WifiOff className="mr-2 h-4 w-4" /> },
+            { href: "/owner/offline-voucher-stock", label: "Stok Voucher Offline", icon: <WifiOff className="mr-2 h-4 w-4" /> },
           ]
         },
         { href: "/owner/distribution", label: "Distribusi", icon: <Share className="mr-2 h-5 w-5" /> },
