@@ -85,6 +85,7 @@ export default function OwnerVoucherStock() {
   const [voucherCodes, setVoucherCodes] = useState<VoucherCodeValues[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Contoh data stock voucher
   const stockVouchers: StockVoucher[] = [
@@ -378,103 +379,125 @@ export default function OwnerVoucherStock() {
                 </Button>
               </div>
               <CardContent className="p-6">
-                {/* Filter Controls */}
-                <div className="flex flex-wrap items-center gap-4 mb-6 pb-4 border-b border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm font-medium">Filter Status:</label>
-                    <Select defaultValue="all" onValueChange={(value) => {
-                      toast({
-                        title: "Filter Diubah",
-                        description: `Filter status: ${value}`,
-                      });
-                    }}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Pilih Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Semua Status</SelectItem>
-                        <SelectItem value="Belum Terjual">Belum Terjual</SelectItem>
-                        <SelectItem value="Terjual">Terjual</SelectItem>
-                        <SelectItem value="Retur">Retur</SelectItem>
-                      </SelectContent>
-                    </Select>
+                {/* Status summary boxes */}
+                <div className="grid grid-cols-4 gap-4 mb-6">
+                  <div className="bg-green-100 border border-green-200 rounded-lg p-4 text-center">
+                    <h3 className="text-xl font-semibold text-green-800">
+                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id).length}
+                    </h3>
+                    <p className="text-sm text-green-700">Semua</p>
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm font-medium">Tanggal Aktif:</label>
-                    <div className="flex items-center space-x-2">
-                      <Input 
-                        type="date" 
-                        className="w-[150px]" 
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            toast({
-                              title: "Filter Diubah",
-                              description: `Filter tanggal aktif dari: ${e.target.value}`,
-                            });
-                          }
-                        }} 
-                      />
-                      <span>-</span>
-                      <Input 
-                        type="date" 
-                        className="w-[150px]" 
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            toast({
-                              title: "Filter Diubah",
-                              description: `Filter tanggal aktif sampai: ${e.target.value}`,
-                            });
-                          }
-                        }}
-                      />
-                    </div>
+                  <div className="bg-blue-100 border border-blue-200 rounded-lg p-4 text-center">
+                    <h3 className="text-xl font-semibold text-blue-800">
+                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Belum Terjual").length}
+                    </h3>
+                    <p className="text-sm text-blue-700">Belum Terjual</p>
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <label className="text-sm font-medium">Tanggal Jual:</label>
-                    <div className="flex items-center space-x-2">
-                      <Input 
-                        type="date" 
-                        className="w-[150px]" 
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            toast({
-                              title: "Filter Diubah",
-                              description: `Filter tanggal jual dari: ${e.target.value}`,
-                            });
-                          }
-                        }}
-                      />
-                      <span>-</span>
-                      <Input 
-                        type="date" 
-                        className="w-[150px]" 
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            toast({
-                              title: "Filter Diubah",
-                              description: `Filter tanggal jual sampai: ${e.target.value}`,
-                            });
-                          }
-                        }}
-                      />
-                    </div>
+                  <div className="bg-red-100 border border-red-200 rounded-lg p-4 text-center">
+                    <h3 className="text-xl font-semibold text-red-800">
+                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Terjual").length}
+                    </h3>
+                    <p className="text-sm text-red-700">Terjual</p>
                   </div>
-                  
+                  <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-center">
+                    <h3 className="text-xl font-semibold text-yellow-800">
+                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Retur").length}
+                    </h3>
+                    <p className="text-sm text-yellow-700">Retur</p>
+                  </div>
+                </div>
+                
+                {/* Filter toggle button */}
+                <div className="flex justify-between items-center mb-4">
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => {
-                      toast({
-                        title: "Filter Direset",
-                        description: "Semua filter telah dihapus",
-                      });
-                    }}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="mb-2"
                   >
-                    Reset Filter
+                    {showFilters ? "Sembunyikan Filter" : "Tampilkan Filter"}
                   </Button>
                 </div>
+                
+                {/* Filter Controls */}
+                {showFilters && (
+                  <div className="flex flex-wrap items-center gap-4 mb-6 pb-4 border-b border-gray-200">                    
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium">Tanggal Aktif:</label>
+                      <div className="flex items-center space-x-2">
+                        <Input 
+                          type="date" 
+                          className="w-[150px]" 
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              toast({
+                                title: "Filter Diubah",
+                                description: `Filter tanggal aktif dari: ${e.target.value}`,
+                              });
+                            }
+                          }} 
+                        />
+                        <span>-</span>
+                        <Input 
+                          type="date" 
+                          className="w-[150px]" 
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              toast({
+                                title: "Filter Diubah",
+                                description: `Filter tanggal aktif sampai: ${e.target.value}`,
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium">Tanggal Jual:</label>
+                      <div className="flex items-center space-x-2">
+                        <Input 
+                          type="date" 
+                          className="w-[150px]" 
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              toast({
+                                title: "Filter Diubah",
+                                description: `Filter tanggal jual dari: ${e.target.value}`,
+                              });
+                            }
+                          }}
+                        />
+                        <span>-</span>
+                        <Input 
+                          type="date" 
+                          className="w-[150px]" 
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              toast({
+                                title: "Filter Diubah",
+                                description: `Filter tanggal jual sampai: ${e.target.value}`,
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        toast({
+                          title: "Filter Direset",
+                          description: "Semua filter telah dihapus",
+                        });
+                      }}
+                    >
+                      Reset Filter
+                    </Button>
+                  </div>
+                )}
                 
                 <DataTable
                   data={dataVouchers.filter(v => v.voucherId === selectedVoucher?.id)}
