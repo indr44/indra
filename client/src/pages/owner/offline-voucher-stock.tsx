@@ -148,7 +148,7 @@ export default function OfflineVoucherStock() {
     }
   ]);
 
-  const [showDataVoucher, setShowDataVoucher] = useState(false);
+  // Menghapus state showDataVoucher karena tidak perlu menampilkan tabel data voucher
   const [selectedVoucher, setSelectedVoucher] = useState<StockVoucher | null>(null);
   const [selectedVoucherId, setSelectedVoucherId] = useState<number | null>(null);
   const [selectedCodeId, setSelectedCodeId] = useState<number | null>(null);
@@ -255,57 +255,17 @@ export default function OfflineVoucherStock() {
     });
   };
 
-  // Tampilkan detail voucher ketika nama barang di-klik
-  const showVoucherDetails = (voucher: StockVoucher) => {
-    setSelectedVoucher(voucher);
-    setShowDataVoucher(true);
+  // Function untuk menampilkan pesan notifikasi
+  const showNotification = (title: string, message: string) => {
+    toast({
+      title,
+      description: message,
+    });
   };
 
   // Handle hapus voucher atau kode voucher
   const handleDelete = () => {
-    if (showDataVoucher && selectedCodeId) {
-      // Hapus kode voucher
-      const deletedCode = dataVouchers.find(code => code.id === selectedCodeId);
-      const filteredCodes = dataVouchers.filter(code => code.id !== selectedCodeId);
-      setDataVouchers(filteredCodes);
-      
-      // Update jumlah voucher di stok
-      if (deletedCode && selectedVoucher) {
-        const updatedStockVouchers = stockVouchers.map(stock => {
-          if (stock.id === selectedVoucher.id) {
-            let newBelumTerjual = stock.belumTerjual;
-            let newTerjual = stock.terjual;
-            let newRetur = stock.retur;
-            
-            if (deletedCode.status === "Belum Terjual") {
-              newBelumTerjual = Math.max(0, newBelumTerjual - 1);
-            } else if (deletedCode.status === "Terjual") {
-              newTerjual = Math.max(0, newTerjual - 1);
-            } else if (deletedCode.status === "Retur") {
-              newRetur = Math.max(0, newRetur - 1);
-            }
-            
-            return {
-              ...stock,
-              belumTerjual: newBelumTerjual,
-              belumTerjualRp: newBelumTerjual * stock.hargaBarang,
-              terjual: newTerjual,
-              terjualRp: newTerjual * stock.hargaBarang,
-              retur: newRetur,
-              returRp: newRetur * stock.hargaBarang
-            };
-          }
-          return stock;
-        });
-        
-        setStockVouchers(updatedStockVouchers);
-      }
-      
-      toast({
-        title: "Berhasil Dihapus",
-        description: "Kode voucher telah dihapus",
-      });
-    } else if (selectedVoucherId) {
+    if (selectedVoucherId) {
       // Hapus voucher
       setStockVouchers(stockVouchers.filter(v => v.id !== selectedVoucherId));
       // Hapus semua kode voucher terkait
@@ -325,344 +285,112 @@ export default function OfflineVoucherStock() {
   return (
     <SidebarLayout title="Stok Voucher Offline">
       <div className="space-y-6">
-        {!showDataVoucher ? (
-          // Tampilkan Stok Voucher Offline
-          <Card>
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800">Stok Voucher Offline</h2>
-              <Button 
-                className="bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => setIsAddVoucherOpen(true)}
-              >
-                <Plus className="mr-2 h-4 w-4" /> Tambah Barang
-              </Button>
-            </div>
-            <CardContent className="p-6">
-              <DataTable
-                data={stockVouchers}
-                columns={[
-                  {
-                    header: "Nama Barang",
-                    accessorKey: "namaBarang",
-                    cell: (row) => (
-                      <Button 
-                        variant="link" 
-                        className="p-0 h-auto font-normal text-blue-600 hover:text-blue-800"
-                        onClick={() => showVoucherDetails(row)}
-                      >
-                        {row.namaBarang}
-                      </Button>
-                    )
-                  },
-                  {
-                    header: "Harga Barang",
-                    accessorKey: "hargaBarang",
-                    cell: (row) => `Rp ${row.hargaBarang.toLocaleString('id-ID')}`,
-                  },
-                  {
-                    header: "Belum Terjual",
-                    accessorKey: "belumTerjual",
-                  },
-                  {
-                    header: "Belum Terjual (Rp)",
-                    accessorKey: "belumTerjualRp",
-                    cell: (row) => `Rp ${row.belumTerjualRp.toLocaleString('id-ID')}`,
-                  },
-                  {
-                    header: "Terjual",
-                    accessorKey: "terjual",
-                  },
-                  {
-                    header: "Terjual (Rp)",
-                    accessorKey: "terjualRp",
-                    cell: (row) => `Rp ${row.terjualRp.toLocaleString('id-ID')}`,
-                  },
-                  {
-                    header: "Retur",
-                    accessorKey: "retur",
-                  },
-                  {
-                    header: "Retur (Rp)",
-                    accessorKey: "returRp",
-                    cell: (row) => `Rp ${row.returRp.toLocaleString('id-ID')}`,
-                  },
-                  {
-                    header: "Opsi",
-                    accessorKey: "id",
-                    cell: (row) => (
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          onClick={() => {
-                            toast({
-                              title: "Edit Voucher",
-                              description: "Fitur edit sedang dikembangkan.",
-                            });
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            setSelectedVoucherId(row.id);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ),
-                  },
-                ]}
-                searchable
-                pagination
-                primaryColor="green"
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          // Tampilkan Data Voucher
-          <div className="space-y-6">
-            <Card>
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <div className="flex items-center">
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => setShowDataVoucher(false)}
-                    className="mr-2"
-                  >
-                    ← Kembali
-                  </Button>
-                  <h2 className="font-semibold text-gray-800">
-                    Data Voucher - {selectedVoucher?.namaBarang}
-                  </h2>
-                </div>
-                <Button 
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => setIsAddVoucherCodeOpen(true)}
-                >
-                  <Plus className="mr-2 h-4 w-4" /> Tambah Kode Voucher
-                </Button>
-              </div>
-              <CardContent className="p-6">
-                {/* Status summary boxes */}
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                  <div className="bg-green-100 border border-green-200 rounded-lg p-4 text-center">
-                    <h3 className="text-xl font-semibold text-green-800">
-                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id).length}
-                    </h3>
-                    <p className="text-sm text-green-700">Semua</p>
-                    <p className="text-xs text-green-600 mt-1">
-                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id).length * (selectedVoucher?.hargaBarang || 0)).toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                  <div className="bg-blue-100 border border-blue-200 rounded-lg p-4 text-center">
-                    <h3 className="text-xl font-semibold text-blue-800">
-                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Belum Terjual").length}
-                    </h3>
-                    <p className="text-sm text-blue-700">Belum Terjual</p>
-                    <p className="text-xs text-blue-600 mt-1">
-                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Belum Terjual").length * (selectedVoucher?.hargaBarang || 0)).toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                  <div className="bg-red-100 border border-red-200 rounded-lg p-4 text-center">
-                    <h3 className="text-xl font-semibold text-red-800">
-                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Terjual").length}
-                    </h3>
-                    <p className="text-sm text-red-700">Terjual</p>
-                    <p className="text-xs text-red-600 mt-1">
-                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Terjual").length * (selectedVoucher?.hargaBarang || 0)).toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                  <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-center">
-                    <h3 className="text-xl font-semibold text-yellow-800">
-                      {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Retur").length}
-                    </h3>
-                    <p className="text-sm text-yellow-700">Retur</p>
-                    <p className="text-xs text-yellow-600 mt-1">
-                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Retur").length * (selectedVoucher?.hargaBarang || 0)).toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Filter toggle button */}
-                <div className="flex justify-between items-center mb-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="mb-2"
-                  >
-                    {showFilters ? "Sembunyikan Filter" : "Tampilkan Filter"}
-                  </Button>
-                </div>
-                
-                {/* Filter Controls */}
-                {showFilters && (
-                  <div className="flex flex-wrap items-center gap-4 mb-6 pb-4 border-b border-gray-200">                    
-                    <div className="flex items-center space-x-2">
-                      <label className="text-sm font-medium">Tanggal Aktif:</label>
-                      <div className="flex items-center space-x-2">
-                        <Input 
-                          type="date" 
-                          className="w-[150px]" 
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              toast({
-                                title: "Filter Diubah",
-                                description: `Filter tanggal aktif dari: ${e.target.value}`,
-                              });
-                            }
-                          }} 
-                        />
-                        <span>-</span>
-                        <Input 
-                          type="date" 
-                          className="w-[150px]" 
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              toast({
-                                title: "Filter Diubah",
-                                description: `Filter tanggal aktif sampai: ${e.target.value}`,
-                              });
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <label className="text-sm font-medium">Tanggal Jual:</label>
-                      <div className="flex items-center space-x-2">
-                        <Input 
-                          type="date" 
-                          className="w-[150px]" 
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              toast({
-                                title: "Filter Diubah",
-                                description: `Filter tanggal jual dari: ${e.target.value}`,
-                              });
-                            }
-                          }}
-                        />
-                        <span>-</span>
-                        <Input 
-                          type="date" 
-                          className="w-[150px]" 
-                          onChange={(e) => {
-                            if (e.target.value) {
-                              toast({
-                                title: "Filter Diubah",
-                                description: `Filter tanggal jual sampai: ${e.target.value}`,
-                              });
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => {
-                        toast({
-                          title: "Filter Direset",
-                          description: "Semua filter telah dihapus",
-                        });
-                      }}
-                    >
-                      Reset Filter
-                    </Button>
-                  </div>
-                )}
-                
-                <DataTable
-                  data={dataVouchers.filter(v => v.voucherId === selectedVoucher?.id)}
-                  columns={[
-                    {
-                      header: "Username",
-                      accessorKey: "username",
-                    },
-                    {
-                      header: "Password",
-                      accessorKey: "password",
-                    },
-                    {
-                      header: "Status",
-                      accessorKey: "status",
-                      cell: (row) => {
-                        let className = "bg-blue-100 text-blue-800";
-                        
-                        if (row.status === "Terjual") {
-                          className = "bg-green-100 text-green-800";
-                        } else if (row.status === "Retur") {
-                          className = "bg-red-100 text-red-800";
-                        }
-                        
-                        return (
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${className}`}>
-                            {row.status}
-                          </span>
-                        );
-                      },
-                    },
-                    {
-                      header: "Tanggal Aktif",
-                      accessorKey: "tanggalAktif",
-                      cell: (row) => new Date(row.tanggalAktif).toLocaleDateString('id-ID'),
-                    },
-                    {
-                      header: "Tanggal Jual",
-                      accessorKey: "tanggalJual",
-                      cell: (row) => row.tanggalJual ? new Date(row.tanggalJual).toLocaleDateString('id-ID') : "-",
-                    },
-                    {
-                      header: "Opsi",
-                      accessorKey: "id",
-                      cell: (row) => (
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => {
-                              toast({
-                                title: "Edit Kode Voucher",
-                                description: "Fitur edit sedang dikembangkan.",
-                              });
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => {
-                              setSelectedCodeId(row.id);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ),
-                    },
-                  ]}
-                  searchable
-                  pagination
-                  primaryColor="green"
-                />
-              </CardContent>
-            </Card>
+        <Card>
+          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="font-semibold text-gray-800">Stok Voucher Offline</h2>
+            <Button 
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => setIsAddVoucherOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Tambah Barang
+            </Button>
           </div>
-        )}
+          <CardContent className="p-6">
+            <DataTable
+              data={stockVouchers}
+              columns={[
+                {
+                  header: "Nama Barang",
+                  accessorKey: "namaBarang",
+                  cell: (row) => (
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto font-normal text-blue-600 hover:text-blue-800"
+                      onClick={() => showNotification("Informasi", `Detail voucher: ${row.namaBarang}`)}
+                    >
+                      {row.namaBarang}
+                    </Button>
+                  )
+                },
+                {
+                  header: "Harga Barang",
+                  accessorKey: "hargaBarang",
+                  cell: (row) => (
+                    <span>Rp {row.hargaBarang.toLocaleString('id-ID')}</span>
+                  ),
+                },
+                {
+                  header: "Belum Terjual",
+                  accessorKey: "belumTerjual",
+                },
+                {
+                  header: "Belum Terjual (Rp)",
+                  accessorKey: "belumTerjualRp",
+                  cell: (row) => (
+                    <span>Rp {row.belumTerjualRp.toLocaleString('id-ID')}</span>
+                  ),
+                },
+                {
+                  header: "Terjual",
+                  accessorKey: "terjual",
+                },
+                {
+                  header: "Terjual (Rp)",
+                  accessorKey: "terjualRp",
+                  cell: (row) => (
+                    <span>Rp {row.terjualRp.toLocaleString('id-ID')}</span>
+                  ),
+                },
+                {
+                  header: "Retur",
+                  accessorKey: "retur",
+                },
+                {
+                  header: "Retur (Rp)",
+                  accessorKey: "returRp",
+                  cell: (row) => (
+                    <span>Rp {row.returRp.toLocaleString('id-ID')}</span>
+                  ),
+                },
+                {
+                  header: "Opsi",
+                  accessorKey: "id",
+                  cell: (row) => (
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => {
+                          toast({
+                            title: "Edit Voucher",
+                            description: "Fitur edit sedang dikembangkan.",
+                          });
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => {
+                          setSelectedVoucherId(row.id);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ),
+                },
+              ]}
+              searchable
+              pagination
+              primaryColor="green"
+            />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Dialog Tambah Voucher */}
