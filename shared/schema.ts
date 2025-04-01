@@ -48,6 +48,7 @@ export const distributions = pgTable("distributions", {
   ownerId: integer("owner_id").notNull(), // ID of the owner distributing the vouchers
   employeeId: integer("employee_id").notNull(), // ID of the employee receiving the vouchers
   voucherId: integer("voucher_id").notNull(), // ID of the voucher being distributed
+  voucherType: text("voucher_type", { enum: ["online", "offline"] }).notNull(),
   quantity: integer("quantity").notNull(),
   unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),

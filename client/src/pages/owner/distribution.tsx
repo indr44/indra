@@ -24,6 +24,7 @@ const distributionFormSchema = insertDistributionSchema.omit({
   createdAt: true,
 }).extend({
   totalPrice: z.number().optional(), // Will be calculated
+  voucherType: z.enum(["online", "offline"]), // Online or Offline voucher type
 });
 
 type DistributionFormValues = z.infer<typeof distributionFormSchema>;
@@ -61,6 +62,7 @@ export default function OwnerDistribution() {
       // Removed paymentMethod field
       paymentStatus: "pending",
       notes: "",
+      voucherType: "online", // Default to online
     },
   });
 
@@ -173,6 +175,11 @@ export default function OwnerDistribution() {
                     },
                   },
                   {
+                    header: "Jenis Stok",
+                    accessorKey: "voucherType",
+                    cell: (row) => row.voucherType === "online" ? "Stok Voucher Online" : "Stok Voucher Offline",
+                  },
+                  {
                     header: "Jumlah",
                     accessorKey: "quantity",
                   },
@@ -283,6 +290,31 @@ export default function OwnerDistribution() {
                 
                 <FormField
                   control={form.control}
+                  name="voucherType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Jenis Stok</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih jenis stok" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="online">Stok Voucher Online</SelectItem>
+                          <SelectItem value="offline">Stok Voucher Offline</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
                   name="voucherId"
                   render={({ field }) => (
                     <FormItem>
@@ -301,7 +333,11 @@ export default function OwnerDistribution() {
                             <div className="p-2 text-center">Memuat...</div>
                           ) : vouchers && vouchers.length > 0 ? (
                             vouchers
-                              .filter((voucher: any) => voucher.currentStock > 0)
+                              .filter((voucher: any) => 
+                                voucher.currentStock > 0 && 
+                                ((form.watch("voucherType") === "online" && !voucher.isOffline) || 
+                                 (form.watch("voucherType") === "offline" && voucher.isOffline))
+                              )
                               .map((voucher: any) => (
                                 <SelectItem key={voucher.id} value={voucher.id.toString()}>
                                   {voucher.namaBarang || voucher.type} ({voucher.currentStock} stok tersedia)
@@ -488,6 +524,12 @@ export default function OwnerDistribution() {
                       const voucher = vouchers?.find((v: any) => v.id === selectedDistribution.voucherId);
                       return voucher ? (voucher.namaBarang || voucher.type) : `Barang #${selectedDistribution.voucherId}`;
                     })()}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">Jenis Stok</h4>
+                  <p className="text-sm">
+                    {selectedDistribution.voucherType === "online" ? "Stok Voucher Online" : "Stok Voucher Offline"}
                   </p>
                 </div>
                 <div>
