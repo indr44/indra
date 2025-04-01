@@ -9,6 +9,10 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
   role: text("role", { enum: ["owner", "employee", "customer"] }).notNull().default("customer"),
+  whatsapp: text("whatsapp"),
+  address: text("address"),
+  location: text("location"),
+  profileImage: text("profile_image"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

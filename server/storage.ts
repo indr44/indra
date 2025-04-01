@@ -26,13 +26,16 @@ const MemoryStore = createMemoryStore(session);
 // Define interface for all storage operations
 export interface IStorage {
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using 'any' for session store type
 
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, data: Partial<User>): Promise<User>;
+  deleteUser(id: number): Promise<boolean>;
   getAllEmployees(): Promise<User[]>;
+  getAllCustomers(): Promise<User[]>;
 
   // Voucher operations
   createVoucher(voucher: InsertVoucher): Promise<Voucher>;
@@ -71,7 +74,7 @@ export class MemStorage implements IStorage {
   private saleStore: Map<number, Sale>;
   private customerVoucherStore: Map<number, CustomerVoucher>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: any;
   currentUserId: number;
   currentVoucherId: number;
   currentDistributionId: number;
@@ -112,6 +115,10 @@ export class MemStorage implements IStorage {
       password: adminPass,
       fullName: "Admin Owner",
       role: "owner",
+      whatsapp: "628111222333",
+      address: "Jalan Utama No. 1, Jakarta Pusat",
+      location: "https://maps.google.com/?q=-6.175110,106.865036",
+      profileImage: "https://i.pravatar.cc/300?img=1",
       createdAt: new Date()
     });
     
@@ -121,6 +128,10 @@ export class MemStorage implements IStorage {
       password: userPass,
       fullName: "Sarah Johnson",
       role: "employee",
+      whatsapp: "628222333444",
+      address: "Jalan Harapan No. 23, Jakarta Selatan",
+      location: "https://maps.google.com/?q=-6.260697,106.781612",
+      profileImage: "https://i.pravatar.cc/300?img=5",
       createdAt: new Date()
     });
     
@@ -130,6 +141,10 @@ export class MemStorage implements IStorage {
       password: userPass,
       fullName: "John Smith",
       role: "customer",
+      whatsapp: "628333444555",
+      address: "Jalan Damai No. 45, Jakarta Barat",
+      location: "https://maps.google.com/?q=-6.198582,106.800603",
+      profileImage: "https://i.pravatar.cc/300?img=8",
       createdAt: new Date()
     });
     
@@ -149,9 +164,34 @@ export class MemStorage implements IStorage {
 
   async createUser(userData: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...userData, id, createdAt: new Date() };
+    
+    // Ensure all required fields are set with proper defaults
+    const user: User = { 
+      ...userData, 
+      id, 
+      createdAt: new Date(), 
+      role: userData.role || "customer", 
+      whatsapp: userData.whatsapp || null,
+      address: userData.address || null,
+      location: userData.location || null,
+      profileImage: userData.profileImage || null
+    };
+    
     this.userStore.set(id, user);
     return user;
+  }
+
+  async updateUser(id: number, data: Partial<User>): Promise<User> {
+    const user = this.userStore.get(id);
+    if (!user) throw new Error("User not found");
+    
+    const updatedUser = { ...user, ...data };
+    this.userStore.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    return this.userStore.delete(id);
   }
 
   async getAllEmployees(): Promise<User[]> {
@@ -160,10 +200,21 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getAllCustomers(): Promise<User[]> {
+    return Array.from(this.userStore.values()).filter(
+      (user) => user.role === "customer"
+    );
+  }
+
   // Voucher operations
   async createVoucher(voucherData: InsertVoucher): Promise<Voucher> {
     const id = this.currentVoucherId++;
-    const voucher: Voucher = { ...voucherData, id, createdAt: new Date() };
+    const voucher: Voucher = { 
+      ...voucherData, 
+      id, 
+      createdAt: new Date(),
+      supplier: voucherData.supplier || null
+    };
     this.voucherStore.set(id, voucher);
     return voucher;
   }
@@ -192,7 +243,12 @@ export class MemStorage implements IStorage {
   // Distribution operations
   async createDistribution(distributionData: InsertDistribution): Promise<Distribution> {
     const id = this.currentDistributionId++;
-    const distribution: Distribution = { ...distributionData, id, createdAt: new Date() };
+    const distribution: Distribution = { 
+      ...distributionData, 
+      id, 
+      createdAt: new Date(),
+      notes: distributionData.notes || null
+    };
     this.distributionStore.set(id, distribution);
     return distribution;
   }
@@ -233,7 +289,14 @@ export class MemStorage implements IStorage {
   // Sales operations
   async createSale(saleData: InsertSale): Promise<Sale> {
     const id = this.currentSaleId++;
-    const sale: Sale = { ...saleData, id, createdAt: new Date() };
+    const sale: Sale = { 
+      ...saleData, 
+      id, 
+      createdAt: new Date(),
+      notes: saleData.notes || null,
+      isOnline: saleData.isOnline ?? true,
+      isSynced: saleData.isSynced ?? true 
+    };
     this.saleStore.set(id, sale);
     return sale;
   }
@@ -251,7 +314,7 @@ export class MemStorage implements IStorage {
       ...voucherData, 
       id, 
       createdAt: new Date(),
-      usedAt: undefined
+      usedAt: null
     };
     this.customerVoucherStore.set(id, voucher);
     return voucher;

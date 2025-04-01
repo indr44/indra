@@ -61,6 +61,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
   };
 
   const [voucherStockOpen, setVoucherStockOpen] = useState(false);
+  const [dataUserOpen, setDataUserOpen] = useState(false);
   
   // Get relevant links based on user role
   const getNavLinks = () => {
@@ -79,8 +80,18 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
           ]
         },
         { href: "/owner/distribution", label: "Distribusi", icon: <Share className="mr-2 h-5 w-5" /> },
-        // Additional owner links
-        { href: "#", label: "Kelola Karyawan", icon: <Users className="mr-2 h-5 w-5" /> },
+        // Data User submenu with two options: Karyawan and Pelanggan
+        { 
+          isSubmenu: true, 
+          label: "Data User", 
+          icon: <Users className="mr-2 h-5 w-5" />,
+          open: dataUserOpen,
+          toggle: () => setDataUserOpen(!dataUserOpen),
+          items: [
+            { href: "/owner/employees", label: "Karyawan", icon: <UserCircle className="mr-2 h-4 w-4" /> },
+            { href: "/owner/customers", label: "Pelanggan", icon: <Users className="mr-2 h-4 w-4" /> },
+          ]
+        },
         { href: "#", label: "Laporan", icon: <BarChart className="mr-2 h-5 w-5" /> },
         { href: "#", label: "Pengaturan", icon: <Settings className="mr-2 h-5 w-5" /> },
       ];

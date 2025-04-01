@@ -8,7 +8,8 @@ import {
   insertDistributionSchema,
   insertSaleSchema,
   insertEmployeeStockSchema,
-  insertCustomerVoucherSchema
+  insertCustomerVoucherSchema,
+  insertUserSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -95,6 +96,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(employees);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch employees" });
+    }
+  });
+  
+  // Get all customers
+  app.get("/api/customers", isOwner, async (req, res) => {
+    try {
+      const customers = await storage.getAllCustomers();
+      res.json(customers);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch customers" });
+    }
+  });
+  
+  // Create new employee
+  app.post("/api/employees", isOwner, async (req, res) => {
+    try {
+      // Set role to employee
+      const userData = insertUserSchema.parse({
+        ...req.body,
+        role: "employee"
+      });
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(userData.username);
+      if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
+      }
+      
+      const user = await storage.createUser(userData);
+      res.status(201).json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create employee" });
+    }
+  });
+  
+  // Create new customer
+  app.post("/api/customers", isOwner, async (req, res) => {
+    try {
+      // Set role to customer
+      const userData = insertUserSchema.parse({
+        ...req.body,
+        role: "customer"
+      });
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(userData.username);
+      if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
+      }
+      
+      const user = await storage.createUser(userData);
+      res.status(201).json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create customer" });
+    }
+  });
+  
+  // Update user (employee or customer)
+  app.patch("/api/users/:id", isOwner, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Prevent changing role
+      if (req.body.role && req.body.role !== user.role) {
+        return res.status(400).json({ error: "Cannot change user role" });
+      }
+      
+      const updatedUser = await storage.updateUser(id, req.body);
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+  
+  // Delete user (employee or customer)
+  app.delete("/api/users/:id", isOwner, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Prevent deleting owner account
+      if (user.role === "owner") {
+        return res.status(403).json({ error: "Cannot delete owner account" });
+      }
+      
+      const deleted = await storage.deleteUser(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete user" });
     }
   });
 
