@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SidebarLayout from "@/components/layouts/sidebar-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -17,6 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Dialog } from "@/components/ui/dialog";
 import { Eye, Download, ArrowRight } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // Form schema for distribution creation
 const distributionFormSchema = insertDistributionSchema.omit({
@@ -25,6 +26,8 @@ const distributionFormSchema = insertDistributionSchema.omit({
 }).extend({
   totalPrice: z.number().optional(), // Will be calculated
   voucherType: z.enum(["online", "offline"]), // Online or Offline voucher type
+  recipientType: z.enum(["employee", "customer"]), // Employee or Customer recipient
+  customerId: z.number().optional(), // Optional customer ID if recipientType is "customer"
 });
 
 type DistributionFormValues = z.infer<typeof distributionFormSchema>;
@@ -45,6 +48,11 @@ export default function OwnerDistribution() {
     queryKey: ["/api/employees"],
   });
 
+  // Fetch customers
+  const { data: customers, isLoading: isLoadingCustomers } = useQuery({
+    queryKey: ["/api/customers"],
+  });
+
   // Fetch vouchers
   const { data: vouchers, isLoading: isLoadingVouchers } = useQuery({
     queryKey: ["/api/vouchers"],
@@ -63,8 +71,25 @@ export default function OwnerDistribution() {
       paymentStatus: "pending",
       notes: "",
       voucherType: "online", // Default to online
+      recipientType: "employee", // Default to employee
+      customerId: undefined, // Will be set based on recipient type
     },
   });
+  
+  // Watch recipient type changes
+  const recipientType = form.watch("recipientType");
+  const selectedVoucherId = form.watch("voucherId");
+  const voucherType = form.watch("voucherType");
+  
+  // Effect to auto-populate unit price when voucher is selected
+  useEffect(() => {
+    if (selectedVoucherId && vouchers) {
+      const selectedVoucher = vouchers.find((v: any) => v.id === selectedVoucherId);
+      if (selectedVoucher && selectedVoucher.unitPrice) {
+        form.setValue("unitPrice", selectedVoucher.unitPrice);
+      }
+    }
+  }, [selectedVoucherId, vouchers, form]);
 
   // Calculate total price when quantity or unit price changes
   const quantity = form.watch("quantity");
@@ -86,20 +111,32 @@ export default function OwnerDistribution() {
       });
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/distributions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/vouchers"] });
+      
+      if (variables.recipientType === "customer") {
+        // If distributed to customer
+        queryClient.invalidateQueries({ queryKey: ["/api/customer-vouchers"] });
+      } else {
+        // If distributed to employee
+        queryClient.invalidateQueries({ queryKey: ["/api/employee-stocks"] });
+      }
+      
       setIsDistributeOpen(false);
       form.reset();
+      
+      // Create appropriate success message based on recipient type
+      const recipientType = variables.recipientType === "customer" ? "pelanggan" : "karyawan";
       toast({
-        title: "Distribution completed",
-        description: "Vouchers have been distributed to the employee successfully.",
+        title: "Distribusi Berhasil",
+        description: `Voucher telah berhasil didistribusikan kepada ${recipientType}.`,
       });
     },
     onError: (error) => {
       toast({
-        title: "Distribution failed",
-        description: error.message || "Something went wrong. Please try again.",
+        title: "Distribusi Gagal",
+        description: error.message || "Terjadi kesalahan. Mohon coba lagi.",
         variant: "destructive",
       });
     },
@@ -112,7 +149,30 @@ export default function OwnerDistribution() {
       data.totalPrice = data.quantity * data.unitPrice;
     }
     
-    createDistributionMutation.mutate(data);
+    // Prepare data based on recipient type
+    if (data.recipientType === "customer") {
+      if (!data.customerId) {
+        toast({
+          title: "Pilih Pelanggan",
+          description: "Silakan pilih pelanggan terlebih dahulu",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Customer-specific processing
+      createDistributionMutation.mutate(data);
+    } else {
+      // Employee-specific processing
+      if (!data.employeeId) {
+        toast({
+          title: "Pilih Karyawan",
+          description: "Silakan pilih karyawan terlebih dahulu",
+          variant: "destructive",
+        });
+        return;
+      }
+      createDistributionMutation.mutate(data);
+    }
   };
 
   // Handle view distribution details
@@ -161,10 +221,20 @@ export default function OwnerDistribution() {
                     cell: (row) => new Date(row.createdAt).toLocaleDateString('id-ID'),
                   },
                   {
-                    header: "Karyawan",
+                    header: "Jenis Penerima",
+                    accessorKey: "recipientType",
+                    cell: (row) => row.recipientType === "customer" ? "Pelanggan" : "Karyawan",
+                  },
+                  {
+                    header: "Nama Penerima",
                     accessorKey: (row) => {
-                      const employee = employees?.find((e: any) => e.id === row.employeeId);
-                      return employee ? employee.fullName : `Karyawan #${row.employeeId}`;
+                      if (row.recipientType === "customer") {
+                        const customer = customers?.find((c: any) => c.id === row.customerId);
+                        return customer ? (customer.fullName || customer.username) : `Pelanggan #${row.customerId}`;
+                      } else {
+                        const employee = employees?.find((e: any) => e.id === row.employeeId);
+                        return employee ? (employee.fullName || employee.username) : `Karyawan #${row.employeeId}`;
+                      }
                     },
                   },
                   {
@@ -254,39 +324,115 @@ export default function OwnerDistribution() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {/* Recipient Type Radio Group */}
                 <FormField
                   control={form.control}
-                  name="employeeId"
+                  name="recipientType"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Pilih Karyawan</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(parseInt(value))} 
-                        value={field.value.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Pilih karyawan" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {isLoadingEmployees ? (
-                            <div className="p-2 text-center">Memuat...</div>
-                          ) : employees && employees.length > 0 ? (
-                            employees.map((employee: any) => (
-                              <SelectItem key={employee.id} value={employee.id.toString()}>
-                                {employee.fullName}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <div className="p-2 text-center">Tidak ada karyawan</div>
-                          )}
-                        </SelectContent>
-                      </Select>
+                    <FormItem className="space-y-3">
+                      <FormLabel>Jenis Penerima</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          className="flex space-x-4"
+                        >
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="employee" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Karyawan
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="customer" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Pelanggan
+                            </FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
+                {/* Employee Selection */}
+                {recipientType === "employee" && (
+                  <FormField
+                    control={form.control}
+                    name="employeeId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pilih Karyawan</FormLabel>
+                        <Select 
+                          onValueChange={(value) => field.onChange(parseInt(value))} 
+                          value={field.value ? field.value.toString() : ""}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih karyawan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {isLoadingEmployees ? (
+                              <div className="p-2 text-center">Memuat...</div>
+                            ) : employees && employees.length > 0 ? (
+                              employees.map((employee: any) => (
+                                <SelectItem key={employee.id} value={employee.id.toString()}>
+                                  {employee.fullName || employee.username}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <div className="p-2 text-center">Tidak ada karyawan</div>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                
+                {/* Customer Selection */}
+                {recipientType === "customer" && (
+                  <FormField
+                    control={form.control}
+                    name="customerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pilih Pelanggan</FormLabel>
+                        <Select 
+                          onValueChange={(value) => field.onChange(parseInt(value))} 
+                          value={field.value ? field.value.toString() : ""}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih pelanggan" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {isLoadingCustomers ? (
+                              <div className="p-2 text-center">Memuat...</div>
+                            ) : customers && customers.length > 0 ? (
+                              customers.map((customer: any) => (
+                                <SelectItem key={customer.id} value={customer.id.toString()}>
+                                  {customer.fullName || customer.username}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <div className="p-2 text-center">Tidak ada pelanggan</div>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 
                 <FormField
                   control={form.control}
@@ -508,15 +654,28 @@ export default function OwnerDistribution() {
                   <h4 className="text-sm font-medium text-gray-500">Tanggal</h4>
                   <p className="text-sm">{new Date(selectedDistribution.createdAt).toLocaleDateString('id-ID')}</p>
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Karyawan</h4>
-                  <p className="text-sm">
-                    {(() => {
-                      const employee = employees?.find((e: any) => e.id === selectedDistribution.employeeId);
-                      return employee ? employee.fullName : `Karyawan #${selectedDistribution.employeeId}`;
-                    })()}
-                  </p>
-                </div>
+                {/* Recipient information */}
+                {selectedDistribution.recipientType === "customer" ? (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Pelanggan</h4>
+                    <p className="text-sm">
+                      {(() => {
+                        const customer = customers?.find((c: any) => c.id === selectedDistribution.customerId);
+                        return customer ? (customer.fullName || customer.username) : `Pelanggan #${selectedDistribution.customerId}`;
+                      })()}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Karyawan</h4>
+                    <p className="text-sm">
+                      {(() => {
+                        const employee = employees?.find((e: any) => e.id === selectedDistribution.employeeId);
+                        return employee ? (employee.fullName || employee.username) : `Karyawan #${selectedDistribution.employeeId}`;
+                      })()}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <h4 className="text-sm font-medium text-gray-500">Nama Barang</h4>
                   <p className="text-sm">
