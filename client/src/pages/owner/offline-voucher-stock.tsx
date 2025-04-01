@@ -53,6 +53,8 @@ interface StockVoucher {
   terjualRp: number;
   retur: number;
   returRp: number;
+  stokAkhir?: number;
+  stokAkhirRp?: number;
 }
 
 // Tipe data untuk data voucher
@@ -188,7 +190,9 @@ export default function OfflineVoucherStock() {
       terjual: 0,
       terjualRp: 0,
       retur: 0,
-      returRp: 0
+      returRp: 0,
+      stokAkhir: 0,
+      stokAkhirRp: 0
     };
     
     setStockVouchers([...stockVouchers, newVoucher]);
@@ -232,6 +236,10 @@ export default function OfflineVoucherStock() {
           newRetur += 1;
         }
         
+        // Calculate stokAkhir using the formula: belumTerjual - terjual - retur = stokAkhir
+        const newStokAkhir = newBelumTerjual - newTerjual - newRetur;
+        const newStokAkhirRp = newStokAkhir * stock.hargaBarang;
+        
         return {
           ...stock,
           belumTerjual: newBelumTerjual,
@@ -239,7 +247,9 @@ export default function OfflineVoucherStock() {
           terjual: newTerjual,
           terjualRp: newTerjual * stock.hargaBarang,
           retur: newRetur,
-          returRp: newRetur * stock.hargaBarang
+          returRp: newRetur * stock.hargaBarang,
+          stokAkhir: newStokAkhir,
+          stokAkhirRp: newStokAkhirRp
         };
       }
       return stock;
@@ -288,12 +298,55 @@ export default function OfflineVoucherStock() {
         <Card>
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="font-semibold text-gray-800">Stok Voucher Offline</h2>
-            <Button 
-              className="bg-green-600 hover:bg-green-700 text-white"
-              onClick={() => setIsAddVoucherOpen(true)}
-            >
-              <Plus className="mr-2 h-4 w-4" /> Tambah Barang
-            </Button>
+            <div className="flex space-x-2">
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => {
+                  if (selectedVoucherId) {
+                    // Implement tambah stok logic
+                    const updatedStockVouchers = stockVouchers.map(stock => {
+                      if (stock.id === selectedVoucherId) {
+                        const newBelumTerjual = stock.belumTerjual + 1;
+                        const newBelumTerjualRp = newBelumTerjual * stock.hargaBarang;
+                        // Calculate stokAkhir using the formula: belumTerjual - terjual - retur = stokAkhir
+                        const newStokAkhir = newBelumTerjual - stock.terjual - stock.retur;
+                        const newStokAkhirRp = newStokAkhir * stock.hargaBarang;
+                        
+                        return {
+                          ...stock,
+                          belumTerjual: newBelumTerjual,
+                          belumTerjualRp: newBelumTerjualRp,
+                          stokAkhir: newStokAkhir,
+                          stokAkhirRp: newStokAkhirRp
+                        };
+                      }
+                      return stock;
+                    });
+                    
+                    setStockVouchers(updatedStockVouchers);
+                    setSelectedVoucherId(null);
+                    
+                    toast({
+                      title: "Berhasil",
+                      description: "Stok berhasil ditambah",
+                    });
+                  } else {
+                    toast({
+                      title: "Pilih Barang",
+                      description: "Silahkan pilih barang yang akan ditambah stoknya",
+                    });
+                  }
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Tambah Stok
+              </Button>
+              <Button 
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => setIsAddVoucherOpen(true)}
+              >
+                <Plus className="mr-2 h-4 w-4" /> Tambah Barang
+              </Button>
+            </div>
           </div>
           <CardContent className="p-6">
             <DataTable
@@ -353,6 +406,29 @@ export default function OfflineVoucherStock() {
                   ),
                 },
                 {
+                  header: "Stok Akhir",
+                  accessorKey: "stokAkhir",
+                  cell: (row) => {
+                    // Calculate stokAkhir on the fly using the formula
+                    const stokAkhir = row.belumTerjual - row.terjual - row.retur;
+                    return (
+                      <span>{stokAkhir}</span>
+                    );
+                  }
+                },
+                {
+                  header: "Stok Akhir (Rp)",
+                  accessorKey: "stokAkhirRp",
+                  cell: (row) => {
+                    // Calculate stokAkhirRp on the fly
+                    const stokAkhir = row.belumTerjual - row.terjual - row.retur;
+                    const stokAkhirRp = stokAkhir * row.hargaBarang;
+                    return (
+                      <span>Rp {stokAkhirRp.toLocaleString('id-ID')}</span>
+                    );
+                  }
+                },
+                {
                   header: "Opsi",
                   accessorKey: "id",
                   cell: (row) => (
@@ -362,13 +438,15 @@ export default function OfflineVoucherStock() {
                         size="sm" 
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         onClick={() => {
+                          // Select this voucher for the "Tambah Stok" button
+                          setSelectedVoucherId(row.id);
                           toast({
-                            title: "Edit Voucher",
-                            description: "Fitur edit sedang dikembangkan.",
+                            title: "Voucher Dipilih",
+                            description: `${row.namaBarang} dipilih untuk menambah stok.`,
                           });
                         }}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Plus className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 
