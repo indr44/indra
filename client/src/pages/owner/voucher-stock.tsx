@@ -386,24 +386,36 @@ export default function OwnerVoucherStock() {
                       {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id).length}
                     </h3>
                     <p className="text-sm text-green-700">Semua</p>
+                    <p className="text-xs text-green-600 mt-1">
+                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id).length * selectedVoucher?.hargaBarang || 0).toLocaleString('id-ID')}
+                    </p>
                   </div>
                   <div className="bg-blue-100 border border-blue-200 rounded-lg p-4 text-center">
                     <h3 className="text-xl font-semibold text-blue-800">
                       {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Belum Terjual").length}
                     </h3>
                     <p className="text-sm text-blue-700">Belum Terjual</p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Belum Terjual").length * selectedVoucher?.hargaBarang || 0).toLocaleString('id-ID')}
+                    </p>
                   </div>
                   <div className="bg-red-100 border border-red-200 rounded-lg p-4 text-center">
                     <h3 className="text-xl font-semibold text-red-800">
                       {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Terjual").length}
                     </h3>
                     <p className="text-sm text-red-700">Terjual</p>
+                    <p className="text-xs text-red-600 mt-1">
+                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Terjual").length * selectedVoucher?.hargaBarang || 0).toLocaleString('id-ID')}
+                    </p>
                   </div>
                   <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-4 text-center">
                     <h3 className="text-xl font-semibold text-yellow-800">
                       {dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Retur").length}
                     </h3>
                     <p className="text-sm text-yellow-700">Retur</p>
+                    <p className="text-xs text-yellow-600 mt-1">
+                      Rp {(dataVouchers.filter(v => v.voucherId === selectedVoucher?.id && v.status === "Retur").length * selectedVoucher?.hargaBarang || 0).toLocaleString('id-ID')}
+                    </p>
                   </div>
                 </div>
                 
