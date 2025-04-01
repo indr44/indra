@@ -1,0 +1,96 @@
+graph TD;
+    %% Warna berdasarkan jenis pengguna
+    classDef owner fill:#4CAF50,stroke:#333,stroke-width:2px;
+    classDef karyawan fill:#2196F3,stroke:#333,stroke-width:2px;
+    classDef pelanggan fill:#FFC107,stroke:#333,stroke-width:2px;
+    classDef decision fill:#FF5722,stroke:#333,stroke-width:2px;
+    classDef popup fill:#9C27B0,stroke:#333,stroke-width:2px;
+
+    A[🔑 Mulai] --> B[🔑 Pemilik Login]:::owner
+    B --> C[📝 Pilih Menu Input Stok Kode Voucher]:::owner
+    C --> D[📝 Masukkan Data Kode Voucher]
+    D --> |Kode Voucher, Nominal, Jenis, Jumlah Stok, Tanggal Expired, Supplier| E[✅ Konfirmasi dan Simpan Data]:::owner
+    E --> F[✅ Selesai]
+    
+    B --> G[📝 Pilih Menu Distribusi Stok ke Karyawan]:::owner
+    G --> H[📝 Pilih Akun Karyawan Penerima]:::owner
+    H --> I[📝 Masukkan Jumlah Stok Voucher]:::owner
+    I --> |Jumlah Stok, Total Harga (Rp), Metode Pembayaran, Status Pembayaran, Tanggal Transaksi| J[💰 Sistem Menampilkan Total Harga]:::owner
+    J --> K{✅ Transaksi Berhasil?}:::decision
+    K -- ❌ Tidak --> P1[⚠️ Pop-up: Transaksi Gagal, Coba Lagi]:::popup
+    P1 --> G
+    K -- ✅ Ya --> L[💰 Kurangi Stok dari Pemilik]:::owner
+    L --> M[💰 Tambahkan Stok ke Karyawan]:::karyawan
+    M --> N[✅ Sub-Proses: Konfirmasi Pembayaran]:::owner
+    N --> O[📝 Karyawan Input Stok Online & Offline]:::karyawan
+    O --> F
+
+    %% Tambahan fitur
+    B --> RE[⚙️ Manajemen Peran & Akses]:::owner
+    RE --> RF[📝 Tambah/Edit Role Admin, Supervisor, Reseller]:::owner
+    RF --> RG[✅ Simpan Pengaturan Role & Hak Akses]:::owner
+    RG --> F
+
+    P --> T1{📶 Koneksi Internet?}:::decision
+    T1 -- ❌ Tidak --> T2[🔄 Mode Offline Aktif]:::karyawan
+    T2 --> T3[📝 Simpan Transaksi Sementara]:::karyawan
+    T3 --> T4{📶 Kembali Online?}:::decision
+    T4 -- ✅ Ya --> T5[🔄 Sinkronisasi ke Server]:::karyawan
+    T5 --> F
+
+    B --> PAY[💰 API Pembayaran Otomatis]:::owner
+    PAY --> PAY1[🔄 Cek Status Pembayaran]:::owner
+    PAY1 --> PAY2{✅ Pembayaran Berhasil?}:::decision
+    PAY2 -- ✅ Ya --> PAY3[💰 Tambahkan Stok Otomatis]:::owner
+    PAY3 --> F
+
+    B --> RW[🎁 Reward & Cashback]:::owner
+    RW --> RW1[📝 Hitung Poin Reward]:::owner
+    RW1 --> RW2{✅ Cukup Poin untuk Redeem?}:::decision
+    RW2 -- ✅ Ya --> RW3[🎟️ Tukarkan Poin ke Voucher/Diskon]:::owner
+    RW3 --> F
+    
+    B --> RH[📢 Reminder Tagihan & Hutang]:::owner
+    RH --> RH1[📨 Kirim Notifikasi Otomatis]:::owner
+    RH1 --> RH2{❌ Hutang Belum Dibayar?}:::decision
+    RH2 -- ✅ Ya --> RH3[💰 Tambahkan Denda Otomatis]:::owner
+    RH3 --> F
+    
+    B --> AI[🤖 AI Chatbot Layanan Pelanggan]:::owner
+    AI --> AI1[📨 Jawab Pertanyaan Otomatis]:::owner
+    AI1 --> AI2{✅ Informasi Diberikan?}:::decision
+    AI2 -- ❌ Tidak --> AI3[🔔 Notifikasi ke Admin]:::owner
+    AI3 --> F
+    
+    B --> SEC[🔒 Sistem Keamanan & Audit Log]:::owner
+    SEC --> SEC1[📜 Catat Log Aktivitas Pengguna]:::owner
+    SEC1 --> SEC2[🔔 Notifikasi Login dari Perangkat Baru]:::owner
+    SEC2 --> F
+    
+    B --> EXP[📊 Export Data & Laporan Keuangan]:::owner
+    EXP --> EXP1[📄 Unduh Laporan Excel/PDF]:::owner
+    EXP1 --> EXP2[📈 Tampilkan Grafik Penjualan & Stok]:::owner
+    EXP2 --> F
+
+    %% Tambahan Fitur Optimalisasi
+    B --> MPS[📉 Auto Reorder Stok]:::owner
+    MPS --> MPS1[🔔 Notifikasi Stok Hampir Habis]:::owner
+    MPS1 --> MPS2[📝 Opsi Pemesanan Ulang]:::owner
+    MPS2 --> F
+
+    B --> PPAY[💳 Multiple Payment Gateway]:::owner
+    PPAY --> PPAY1[💰 QRIS, e-Wallet, Bank Transfer]:::owner
+    PPAY1 --> PPAY2[💳 Split Payment (Cash & e-Wallet)]:::owner
+    PPAY2 --> F
+
+    B --> PWA[📱 Progressive Web App]:::owner
+    PWA --> PWA1[📲 Akses Website seperti Aplikasi Mobile]:::owner
+    PWA1 --> F
+    
+    B --> DM[🌙 Dark Mode & UI Customization]:::owner
+    DM --> DM1[🎨 Pilih Tema & Tata Letak UI]:::owner
+    DM1 --> F
+
+    B --> NOT[🔔 Notifikasi Push Browser]:::owner
+    NOT --> NOT1[📨 Kirim Notifikasi Langsung ke Browser]:::owner
+    NOT1 --> F
