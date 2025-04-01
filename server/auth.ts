@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -102,26 +102,99 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
+    // For development environment, create a mock user
+    if (process.env.NODE_ENV !== 'production') {
+      // Check URL referer to determine role
+      const referer = req.headers.referer || '';
+      let role = 'owner'; // default role
+      
+      if (referer.includes('/employee/')) {
+        role = 'employee';
+      } else if (referer.includes('/customer/')) {
+        role = 'customer';
+      } else if (referer.includes('/owner/')) {
+        role = 'owner';
+      }
+      
+      // Return a mock user based on the referer path
+      return res.json({
+        id: role === 'owner' ? 1 : role === 'employee' ? 2 : 3,
+        username: `dev_${role}`,
+        fullName: `Development ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+        role: role,
+        createdAt: new Date()
+      });
+    }
+    
+    // Production check
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);
   });
 
   // Authorization middleware for different roles
-  const isOwner = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+  const isOwner = (req: Request, res: Response, next: NextFunction) => {
+    // For development environment, bypass authentication
+    if (process.env.NODE_ENV !== 'production') {
+      // Create a mock user if not authenticated
+      if (!req.isAuthenticated()) {
+        // Mock user based on the path
+        (req as any).user = {
+          id: 1,
+          role: "owner",
+          fullName: "Development Owner",
+          username: "dev_owner"
+        };
+      }
+      return next();
+    }
+    
+    // Production environment authentication check
     if (!req.isAuthenticated() || req.user?.role !== "owner") {
       return res.status(403).json({ message: "Unauthorized: Owner access required" });
     }
     next();
   };
 
-  const isEmployee = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+  const isEmployee = (req: Request, res: Response, next: NextFunction) => {
+    // For development environment, bypass authentication
+    if (process.env.NODE_ENV !== 'production') {
+      // Create a mock user if not authenticated
+      if (!req.isAuthenticated()) {
+        // Mock user based on the path
+        (req as any).user = {
+          id: 2,
+          role: "employee",
+          fullName: "Development Employee",
+          username: "dev_employee"
+        };
+      }
+      return next();
+    }
+    
+    // Production environment authentication check
     if (!req.isAuthenticated() || req.user?.role !== "employee") {
       return res.status(403).json({ message: "Unauthorized: Employee access required" });
     }
     next();
   };
 
-  const isCustomer = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+  const isCustomer = (req: Request, res: Response, next: NextFunction) => {
+    // For development environment, bypass authentication
+    if (process.env.NODE_ENV !== 'production') {
+      // Create a mock user if not authenticated
+      if (!req.isAuthenticated()) {
+        // Mock user based on the path
+        (req as any).user = {
+          id: 3,
+          role: "customer",
+          fullName: "Development Customer",
+          username: "dev_customer"
+        };
+      }
+      return next();
+    }
+    
+    // Production environment authentication check
     if (!req.isAuthenticated() || req.user?.role !== "customer") {
       return res.status(403).json({ message: "Unauthorized: Customer access required" });
     }

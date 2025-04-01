@@ -60,31 +60,31 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
   const getNavLinks = () => {
     if (mockUser.role === "owner") {
       return [
-        { href: "/owner/dashboard", label: "Dashboard", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
-        { href: "/owner/voucher-stock", label: "Voucher Stock", icon: <Tags className="mr-2 h-5 w-5" /> },
-        { href: "/owner/distribution", label: "Distribution", icon: <Share className="mr-2 h-5 w-5" /> },
+        { href: "/owner/dashboard", label: "Dasbor", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
+        { href: "/owner/voucher-stock", label: "Stok Voucher", icon: <Tags className="mr-2 h-5 w-5" /> },
+        { href: "/owner/distribution", label: "Distribusi", icon: <Share className="mr-2 h-5 w-5" /> },
         // Additional owner links
-        { href: "#", label: "Employee Management", icon: <Users className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Reports", icon: <BarChart className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Settings", icon: <Settings className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Kelola Karyawan", icon: <Users className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Laporan", icon: <BarChart className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Pengaturan", icon: <Settings className="mr-2 h-5 w-5" /> },
       ];
     } else if (mockUser.role === "employee") {
       return [
-        { href: "/employee/dashboard", label: "Dashboard", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
-        { href: "/employee/my-stock", label: "My Stock", icon: <Tags className="mr-2 h-5 w-5" /> },
+        { href: "/employee/dashboard", label: "Dasbor", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
+        { href: "/employee/my-stock", label: "Stok Saya", icon: <Tags className="mr-2 h-5 w-5" /> },
         // Additional employee links
-        { href: "#", label: "Sales", icon: <ShoppingCart className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Customers", icon: <Users className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Sync Data", icon: <RefreshCw className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Penjualan", icon: <ShoppingCart className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Pelanggan", icon: <Users className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Sinkronisasi Data", icon: <RefreshCw className="mr-2 h-5 w-5" /> },
       ];
     } else { // customer
       return [
-        { href: "/customer/dashboard", label: "Dashboard", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
+        { href: "/customer/dashboard", label: "Dasbor", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
         // Additional customer links
-        { href: "#", label: "My Vouchers", icon: <TicketIcon className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Buy Vouchers", icon: <ShoppingCart className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Transaction History", icon: <History className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Profile", icon: <UserCircle className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Voucher Saya", icon: <TicketIcon className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Beli Voucher", icon: <ShoppingCart className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Riwayat Transaksi", icon: <History className="mr-2 h-5 w-5" /> },
+        { href: "#", label: "Profil", icon: <UserCircle className="mr-2 h-5 w-5" /> },
       ];
     }
   };
@@ -174,8 +174,8 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
               onClick={() => {
                 if (link.href.startsWith("#")) {
                   toast({
-                    title: "Coming Soon",
-                    description: "This feature is under development",
+                    title: "Segera Hadir",
+                    description: "Fitur ini sedang dalam pengembangan",
                     variant: "default",
                   });
                 }
@@ -219,7 +219,9 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
                 mockUser.role === "employee" ? "text-blue-200" : 
                 "text-yellow-200"
               )}>
-                {mockUser.role.charAt(0).toUpperCase() + mockUser.role.slice(1)}
+                {mockUser.role === "owner" ? "Pemilik" : 
+                 mockUser.role === "employee" ? "Karyawan" : 
+                 "Pelanggan"}
               </p>
             </div>
           </div>
@@ -229,7 +231,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
             className={cn("w-full text-white", buttonColor)}
           >
             {logoutMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
-            Logout
+            Keluar
           </Button>
         </div>
       </div>
