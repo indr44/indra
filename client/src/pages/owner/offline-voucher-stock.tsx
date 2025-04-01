@@ -11,7 +11,8 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogDescription 
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -30,6 +31,14 @@ import {
   Trash2 
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Form, 
   FormControl, 
@@ -157,7 +166,20 @@ export default function OfflineVoucherStock() {
   const [isAddVoucherOpen, setIsAddVoucherOpen] = useState(false);
   const [isAddVoucherCodeOpen, setIsAddVoucherCodeOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAddStockOpen, setIsAddStockOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [stockHistoryData, setStockHistoryData] = useState<{
+    date: string;
+    belumTerjual: number;
+    terjual: number;
+    retur: number;
+    stokAkhir: number;
+  }[]>([
+    { date: "2025-04-01", belumTerjual: 10, terjual: 2, retur: 1, stokAkhir: 7 },
+    { date: "2025-04-02", belumTerjual: 12, terjual: 3, retur: 1, stokAkhir: 8 },
+    { date: "2025-04-03", belumTerjual: 15, terjual: 5, retur: 2, stokAkhir: 8 },
+  ]);
   
   // Form untuk tambah voucher
   const voucherForm = useForm<z.infer<typeof voucherSchema>>({
@@ -301,42 +323,7 @@ export default function OfflineVoucherStock() {
             <div className="flex space-x-2">
               <Button 
                 className="bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={() => {
-                  if (selectedVoucherId) {
-                    // Implement tambah stok logic
-                    const updatedStockVouchers = stockVouchers.map(stock => {
-                      if (stock.id === selectedVoucherId) {
-                        const newBelumTerjual = stock.belumTerjual + 1;
-                        const newBelumTerjualRp = newBelumTerjual * stock.hargaBarang;
-                        // Calculate stokAkhir using the formula: belumTerjual - terjual - retur = stokAkhir
-                        const newStokAkhir = newBelumTerjual - stock.terjual - stock.retur;
-                        const newStokAkhirRp = newStokAkhir * stock.hargaBarang;
-                        
-                        return {
-                          ...stock,
-                          belumTerjual: newBelumTerjual,
-                          belumTerjualRp: newBelumTerjualRp,
-                          stokAkhir: newStokAkhir,
-                          stokAkhirRp: newStokAkhirRp
-                        };
-                      }
-                      return stock;
-                    });
-                    
-                    setStockVouchers(updatedStockVouchers);
-                    setSelectedVoucherId(null);
-                    
-                    toast({
-                      title: "Berhasil",
-                      description: "Stok berhasil ditambah",
-                    });
-                  } else {
-                    toast({
-                      title: "Pilih Barang",
-                      description: "Silahkan pilih barang yang akan ditambah stoknya",
-                    });
-                  }
-                }}
+                onClick={() => setIsAddStockOpen(true)}
               >
                 <Plus className="mr-2 h-4 w-4" /> Tambah Stok
               </Button>
@@ -359,7 +346,12 @@ export default function OfflineVoucherStock() {
                     <Button 
                       variant="link" 
                       className="p-0 h-auto font-normal text-blue-600 hover:text-blue-800"
-                      onClick={() => showNotification("Informasi", `Detail voucher: ${row.namaBarang}`)}
+                      onClick={() => {
+                        // Set selected voucher and show history dialog
+                        setSelectedVoucher(row);
+                        setSelectedVoucherId(row.id);
+                        setIsHistoryOpen(true);
+                      }}
                     >
                       {row.namaBarang}
                     </Button>
@@ -438,15 +430,12 @@ export default function OfflineVoucherStock() {
                         size="sm" 
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         onClick={() => {
-                          // Select this voucher for the "Tambah Stok" button
+                          setSelectedVoucher(row);
                           setSelectedVoucherId(row.id);
-                          toast({
-                            title: "Voucher Dipilih",
-                            description: `${row.namaBarang} dipilih untuk menambah stok.`,
-                          });
+                          setIsHistoryOpen(true);
                         }}
                       >
-                        <Plus className="h-4 w-4" />
+                        Detail
                       </Button>
                       <Button 
                         variant="ghost" 
@@ -618,6 +607,158 @@ export default function OfflineVoucherStock() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Dialog Tambah Stok */}
+      <Dialog open={isAddStockOpen} onOpenChange={setIsAddStockOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Tambah Stok Voucher</DialogTitle>
+            <DialogDescription>
+              Pilih voucher dan tambahkan stok
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {stockVouchers.length > 0 ? (
+              <div className="space-y-4">
+                <Label>Pilih Barang</Label>
+                <Select
+                  value={selectedVoucherId?.toString() || ""}
+                  onValueChange={(value) => setSelectedVoucherId(parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih barang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stockVouchers.map((stock) => (
+                      <SelectItem key={stock.id} value={stock.id.toString()}>
+                        {stock.namaBarang} - Rp {stock.hargaBarang.toLocaleString('id-ID')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Jumlah Stok</Label>
+                    <Input 
+                      type="number" 
+                      placeholder="1" 
+                      min="1"
+                      defaultValue="1"
+                    />
+                  </div>
+                  <div>
+                    <Label>Total Harga</Label>
+                    <Input 
+                      type="text" 
+                      disabled
+                      value={selectedVoucherId 
+                        ? `Rp ${(stockVouchers.find(s => s.id === selectedVoucherId)?.hargaBarang || 0).toLocaleString('id-ID')}`
+                        : "Rp 0"
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                Tidak ada barang tersedia. Tambahkan barang terlebih dahulu.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsAddStockOpen(false)}>
+              Batal
+            </Button>
+            <Button 
+              type="button" 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => {
+                if (selectedVoucherId) {
+                  // Add stock logic
+                  const updatedStockVouchers = stockVouchers.map(stock => {
+                    if (stock.id === selectedVoucherId) {
+                      const newBelumTerjual = stock.belumTerjual + 1;
+                      const newBelumTerjualRp = newBelumTerjual * stock.hargaBarang;
+                      // Calculate stokAkhir using the formula: belumTerjual - terjual - retur = stokAkhir
+                      const newStokAkhir = newBelumTerjual - stock.terjual - stock.retur;
+                      const newStokAkhirRp = newStokAkhir * stock.hargaBarang;
+                      
+                      return {
+                        ...stock,
+                        belumTerjual: newBelumTerjual,
+                        belumTerjualRp: newBelumTerjualRp,
+                        stokAkhir: newStokAkhir,
+                        stokAkhirRp: newStokAkhirRp
+                      };
+                    }
+                    return stock;
+                  });
+                  
+                  setStockVouchers(updatedStockVouchers);
+                  setIsAddStockOpen(false);
+                  
+                  toast({
+                    title: "Berhasil",
+                    description: "Stok berhasil ditambah",
+                  });
+                } else {
+                  toast({
+                    title: "Pilih Barang",
+                    description: "Silahkan pilih barang yang akan ditambah stoknya",
+                  });
+                }
+              }}
+              disabled={!selectedVoucherId}
+            >
+              Tambah Stok
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog History Perubahan */}
+      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>
+              Histori Perubahan {selectedVoucher?.namaBarang}
+            </DialogTitle>
+            <DialogDescription>
+              Riwayat perubahan stok per hari (direset setiap bulan)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border px-4 py-2 text-left">Tanggal</th>
+                  <th className="border px-4 py-2 text-center">Belum Terjual</th>
+                  <th className="border px-4 py-2 text-center">Terjual</th>
+                  <th className="border px-4 py-2 text-center">Retur</th>
+                  <th className="border px-4 py-2 text-center">Stok Akhir</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stockHistoryData.map((item, index) => (
+                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <td className="border px-4 py-2">{new Date(item.date).toLocaleDateString('id-ID')}</td>
+                    <td className="border px-4 py-2 text-center">{item.belumTerjual}</td>
+                    <td className="border px-4 py-2 text-center">{item.terjual}</td>
+                    <td className="border px-4 py-2 text-center">{item.retur}</td>
+                    <td className="border px-4 py-2 text-center">{item.stokAkhir}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <DialogFooter>
+            <Button type="button" onClick={() => setIsHistoryOpen(false)}>
+              Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarLayout>
   );
 }
