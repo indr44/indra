@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import SidebarLayout from "@/components/layouts/sidebar-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -83,6 +83,8 @@ export default function OwnerVoucherStock() {
   const [selectedVoucherId, setSelectedVoucherId] = useState<number | null>(null);
   const [selectedCodeId, setSelectedCodeId] = useState<number | null>(null);
   const [voucherCodes, setVoucherCodes] = useState<VoucherCodeValues[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Contoh data stock voucher
   const stockVouchers: StockVoucher[] = [
@@ -209,11 +211,28 @@ export default function OwnerVoucherStock() {
 
   // Fungsi untuk mengimpor kode voucher
   const importVoucherCodes = () => {
-    toast({
-      title: "Impor kode voucher",
-      description: "Fitur impor massal sedang dikembangkan.",
-    });
-    setIsImportModalOpen(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handler untuk file yang diupload
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      // Simulasi membaca file
+      const sampleCodes = [
+        { username: "import001", password: "pass001" },
+        { username: "import002", password: "pass002" },
+        { username: "import003", password: "pass003" },
+      ];
+      setVoucherCodes([...voucherCodes, ...sampleCodes]);
+      toast({
+        title: "File berhasil diimpor",
+        description: `File ${file.name} berhasil diimpor dengan ${sampleCodes.length} kode voucher`,
+      });
+    }
   };
 
   // Fungsi untuk menghapus voucher
@@ -243,7 +262,7 @@ export default function OwnerVoucherStock() {
                 className="bg-green-600 hover:bg-green-700 text-white"
                 onClick={() => setIsAddVoucherOpen(true)}
               >
-                <Plus className="mr-2 h-4 w-4" /> Tambah Voucher
+                <Plus className="mr-2 h-4 w-4" /> Tambah Barang
               </Button>
             </div>
             <CardContent className="p-6">
@@ -359,6 +378,104 @@ export default function OwnerVoucherStock() {
                 </Button>
               </div>
               <CardContent className="p-6">
+                {/* Filter Controls */}
+                <div className="flex flex-wrap items-center gap-4 mb-6 pb-4 border-b border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium">Filter Status:</label>
+                    <Select defaultValue="all" onValueChange={(value) => {
+                      toast({
+                        title: "Filter Diubah",
+                        description: `Filter status: ${value}`,
+                      });
+                    }}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Pilih Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Semua Status</SelectItem>
+                        <SelectItem value="Belum Terjual">Belum Terjual</SelectItem>
+                        <SelectItem value="Terjual">Terjual</SelectItem>
+                        <SelectItem value="Retur">Retur</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium">Tanggal Aktif:</label>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        type="date" 
+                        className="w-[150px]" 
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            toast({
+                              title: "Filter Diubah",
+                              description: `Filter tanggal aktif dari: ${e.target.value}`,
+                            });
+                          }
+                        }} 
+                      />
+                      <span>-</span>
+                      <Input 
+                        type="date" 
+                        className="w-[150px]" 
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            toast({
+                              title: "Filter Diubah",
+                              description: `Filter tanggal aktif sampai: ${e.target.value}`,
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium">Tanggal Jual:</label>
+                    <div className="flex items-center space-x-2">
+                      <Input 
+                        type="date" 
+                        className="w-[150px]" 
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            toast({
+                              title: "Filter Diubah",
+                              description: `Filter tanggal jual dari: ${e.target.value}`,
+                            });
+                          }
+                        }}
+                      />
+                      <span>-</span>
+                      <Input 
+                        type="date" 
+                        className="w-[150px]" 
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            toast({
+                              title: "Filter Diubah",
+                              description: `Filter tanggal jual sampai: ${e.target.value}`,
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      toast({
+                        title: "Filter Direset",
+                        description: "Semua filter telah dihapus",
+                      });
+                    }}
+                  >
+                    Reset Filter
+                  </Button>
+                </div>
+                
                 <DataTable
                   data={dataVouchers.filter(v => v.voucherId === selectedVoucher?.id)}
                   columns={[
@@ -602,7 +719,26 @@ export default function OwnerVoucherStock() {
                 >
                   <FileSpreadsheet className="mr-2 h-4 w-4" /> Pilih File
                 </Button>
+                {/* Input file tersembunyi */}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden"
+                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                  onChange={handleFileChange}
+                />
               </div>
+              {selectedFile && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-md">
+                  <p className="text-sm font-medium text-blue-700 flex items-center">
+                    <FileSpreadsheet className="mr-2 h-4 w-4" /> 
+                    {selectedFile.name}
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    {voucherCodes.length} kode voucher berhasil diparsing dari file
+                  </p>
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-2">
                 *Format file: CSV atau Excel dengan kolom Username dan Password
               </p>
