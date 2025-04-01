@@ -93,7 +93,7 @@ export function DataTable<T>({
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
                 type="text"
-                placeholder="Search..."
+                placeholder="Cari..."
                 className="pl-8"
                 value={searchTerm}
                 onChange={(e) => {
@@ -113,7 +113,7 @@ export function DataTable<T>({
             {exportable && (
               <Button className={buttonColorClass}>
                 <Download className="mr-2 h-4 w-4" />
-                Export
+                Ekspor
               </Button>
             )}
           </div>
@@ -153,7 +153,7 @@ export function DataTable<T>({
                   colSpan={columns.length}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  No results found.
+                  Tidak ada data ditemukan.
                 </TableCell>
               </TableRow>
             )}
@@ -165,11 +165,11 @@ export function DataTable<T>({
       {pagination && totalPages > 1 && (
         <div className="flex items-center justify-between py-2">
           <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{startIndex + 1}</span> to{" "}
+            Menampilkan <span className="font-medium">{startIndex + 1}</span> sampai{" "}
             <span className="font-medium">
               {Math.min(startIndex + itemsPerPage, filteredData.length)}
             </span>{" "}
-            of <span className="font-medium">{filteredData.length}</span> results
+            dari <span className="font-medium">{filteredData.length}</span> hasil
           </div>
           <div className="flex items-center space-x-2">
             <Button

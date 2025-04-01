@@ -64,8 +64,8 @@ export default function OwnerDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Total Vouchers</p>
-                  <p className="text-2xl font-bold text-gray-900">1,254</p>
+                  <p className="text-sm font-medium text-gray-500">Total Voucher</p>
+                  <p className="text-2xl font-bold text-gray-900">1.254</p>
                 </div>
                 <div className="bg-green-100 bg-opacity-80 rounded-full p-3">
                   <Tags className="h-5 w-5 text-green-600" />
@@ -83,7 +83,7 @@ export default function OwnerDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Active Employees</p>
+                  <p className="text-sm font-medium text-gray-500">Karyawan Aktif</p>
                   <p className="text-2xl font-bold text-gray-900">12</p>
                 </div>
                 <div className="bg-blue-100 bg-opacity-80 rounded-full p-3">
@@ -102,8 +102,8 @@ export default function OwnerDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">$24,780</p>
+                  <p className="text-sm font-medium text-gray-500">Pendapatan</p>
+                  <p className="text-2xl font-bold text-gray-900">Rp 24.780.000</p>
                 </div>
                 <div className="bg-green-100 rounded-full p-3">
                   <DollarSign className="h-5 w-5 text-green-600" />
@@ -121,7 +121,7 @@ export default function OwnerDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Pending Payments</p>
+                  <p className="text-sm font-medium text-gray-500">Pembayaran Tertunda</p>
                   <p className="text-2xl font-bold text-gray-900">6</p>
                 </div>
                 <div className="bg-yellow-100 rounded-full p-3">
@@ -140,7 +140,7 @@ export default function OwnerDashboard() {
         {/* Recent Activity */}
         <Card>
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="font-semibold text-gray-800">Recent Activity</h2>
+            <h2 className="font-semibold text-gray-800">Aktivitas Terbaru</h2>
           </div>
           <CardContent className="p-6">
             <div className="flow-root">
@@ -170,7 +170,7 @@ export default function OwnerDashboard() {
                   description: "This feature is under development",
                 })}
               >
-                View all activity
+                Lihat semua aktivitas
                 <ArrowUp className="ml-1 h-4 w-4 rotate-90" />
               </Button>
             </div>
@@ -180,82 +180,82 @@ export default function OwnerDashboard() {
         {/* Voucher Stock Overview */}
         <Card>
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="font-semibold text-gray-800">Voucher Stock Overview</h2>
+            <h2 className="font-semibold text-gray-800">Ikhtisar Stok Voucher</h2>
             <Button 
               className="text-white bg-green-600 hover:bg-green-700"
               onClick={() => toast({
-                title: "Coming Soon",
-                description: "Add voucher feature is under development",
+                title: "Segera Hadir",
+                description: "Fitur tambah voucher sedang dalam pengembangan",
               })}
             >
-              <Tags className="mr-2 h-4 w-4" /> Add Voucher
+              <Tags className="mr-2 h-4 w-4" /> Tambah Voucher
             </Button>
           </div>
           <CardContent className="p-6">
             <Tabs defaultValue="active">
               <TabsList className="mb-4">
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
-                <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
-                <TabsTrigger value="all">All Vouchers</TabsTrigger>
+                <TabsTrigger value="active">Aktif</TabsTrigger>
+                <TabsTrigger value="low-stock">Stok Rendah</TabsTrigger>
+                <TabsTrigger value="out-of-stock">Stok Habis</TabsTrigger>
+                <TabsTrigger value="all">Semua Voucher</TabsTrigger>
               </TabsList>
               
               <TabsContent value="active" className="space-y-4">
                 <VoucherCard 
-                  title="Premium Discount"
-                  value="$50 OFF"
-                  expiryDate="Dec 31, 2023"
+                  title="Diskon Premium"
+                  value="Rp 750.000 OFF"
+                  expiryDate="31 Des 2023"
                   status="active"
                   variant="owner"
                   onAction={() => toast({
-                    title: "View Voucher Details",
-                    description: "Displaying voucher details is coming soon",
+                    title: "Lihat Detail Voucher",
+                    description: "Menampilkan detail voucher segera hadir",
                   })}
-                  actionLabel="View Details"
+                  actionLabel="Lihat Detail"
                 />
                 
                 <VoucherCard 
-                  title="Standard Discount"
-                  value="$25 OFF"
-                  expiryDate="Dec 31, 2023"
+                  title="Diskon Standar"
+                  value="Rp 350.000 OFF"
+                  expiryDate="31 Des 2023"
                   status="active"
                   variant="owner"
                   onAction={() => toast({
-                    title: "View Voucher Details",
-                    description: "Displaying voucher details is coming soon",
+                    title: "Lihat Detail Voucher",
+                    description: "Menampilkan detail voucher segera hadir",
                   })}
-                  actionLabel="View Details"
+                  actionLabel="Lihat Detail"
                 />
               </TabsContent>
               
               <TabsContent value="low-stock">
                 <VoucherCard 
-                  title="Basic Discount"
-                  value="$10 OFF"
-                  expiryDate="Dec 31, 2023"
+                  title="Diskon Dasar"
+                  value="Rp 150.000 OFF"
+                  expiryDate="31 Des 2023"
                   status="active"
                   variant="owner"
                   onAction={() => toast({
-                    title: "Low Stock Alert",
-                    description: "Only 5 vouchers remaining. Do you want to create more?",
+                    title: "Peringatan Stok Rendah",
+                    description: "Hanya tersisa 5 voucher. Apakah Anda ingin membuat lebih banyak?",
                     variant: "destructive",
                   })}
-                  actionLabel="Restock"
+                  actionLabel="Isi Ulang"
                 />
               </TabsContent>
               
               <TabsContent value="out-of-stock">
                 <VoucherCard 
-                  title="Special Event"
-                  value="$100 OFF"
-                  expiryDate="Nov 15, 2023"
+                  title="Acara Spesial"
+                  value="Rp 1.500.000 OFF"
+                  expiryDate="15 Nov 2023"
                   status="expired"
                   variant="owner"
                   onAction={() => toast({
-                    title: "Create New Batch",
-                    description: "Create a new batch of this voucher type?",
+                    title: "Buat Batch Baru",
+                    description: "Buat batch baru untuk tipe voucher ini?",
                   })}
-                  actionLabel="Create New"
+                  actionLabel="Buat Baru"
                 />
               </TabsContent>
               
@@ -263,49 +263,49 @@ export default function OwnerDashboard() {
                 <DataTable 
                   data={[
                     { 
-                      type: 'Premium Discount', 
-                      value: '$50', 
+                      type: 'Diskon Premium', 
+                      value: 'Rp 750.000', 
                       stock: 250, 
-                      expiry: 'Dec 31, 2023', 
-                      status: 'Active'
+                      expiry: '31 Des 2023', 
+                      status: 'Aktif'
                     },
                     { 
-                      type: 'Standard Discount', 
-                      value: '$25', 
+                      type: 'Diskon Standar', 
+                      value: 'Rp 350.000', 
                       stock: 125, 
-                      expiry: 'Dec 31, 2023', 
-                      status: 'Active'
+                      expiry: '31 Des 2023', 
+                      status: 'Aktif'
                     },
                     { 
-                      type: 'Basic Discount', 
-                      value: '$10', 
+                      type: 'Diskon Dasar', 
+                      value: 'Rp 150.000', 
                       stock: 50, 
-                      expiry: 'Dec 31, 2023', 
-                      status: 'Low Stock'
+                      expiry: '31 Des 2023', 
+                      status: 'Stok Rendah'
                     },
                     { 
-                      type: 'Special Event', 
-                      value: '$100', 
+                      type: 'Acara Spesial', 
+                      value: 'Rp 1.500.000', 
                       stock: 0, 
-                      expiry: 'Nov 15, 2023', 
-                      status: 'Out of Stock'
+                      expiry: '15 Nov 2023', 
+                      status: 'Stok Habis'
                     },
                   ]}
                   columns={[
                     {
-                      header: "Voucher Type",
+                      header: "Tipe Voucher",
                       accessorKey: "type",
                     },
                     {
-                      header: "Value",
+                      header: "Nilai",
                       accessorKey: "value",
                     },
                     {
-                      header: "Current Stock",
+                      header: "Stok Saat Ini",
                       accessorKey: "stock",
                     },
                     {
-                      header: "Expiry Date",
+                      header: "Tanggal Kadaluarsa",
                       accessorKey: "expiry",
                     },
                     {
@@ -315,9 +315,9 @@ export default function OwnerDashboard() {
                         const status = row.status;
                         let className = "bg-green-100 text-green-800";
                         
-                        if (status === "Low Stock") {
+                        if (status === "Low Stock" || status === "Stok Rendah") {
                           className = "bg-yellow-100 text-yellow-800";
-                        } else if (status === "Out of Stock") {
+                        } else if (status === "Out of Stock" || status === "Stok Habis") {
                           className = "bg-red-100 text-red-800";
                         }
                         
