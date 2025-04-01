@@ -252,13 +252,13 @@ export default function OwnerVoucherStock() {
   };
 
   return (
-    <SidebarLayout title="Stok Voucher">
+    <SidebarLayout title="Stok Voucher Online">
       <div className="space-y-6">
         {!showDataVoucher ? (
-          // Tampilkan Stok Voucher
+          // Tampilkan Stok Voucher Online
           <Card>
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800">Stok Voucher</h2>
+              <h2 className="font-semibold text-gray-800">Stok Voucher Online</h2>
               <Button 
                 className="bg-green-600 hover:bg-green-700 text-white"
                 onClick={() => setIsAddVoucherOpen(true)}
