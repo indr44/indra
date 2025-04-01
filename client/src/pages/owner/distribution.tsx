@@ -58,7 +58,7 @@ export default function OwnerDistribution() {
       quantity: 0,
       unitPrice: 0,
       totalPrice: 0,
-      paymentMethod: "",
+      // Removed paymentMethod field
       paymentStatus: "pending",
       notes: "",
     },
@@ -128,12 +128,12 @@ export default function OwnerDistribution() {
         {/* Distribution Form */}
         <Card>
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="font-semibold text-gray-800">Distribute Vouchers to Employee</h2>
+            <h2 className="font-semibold text-gray-800">Form Tembak Stok</h2>
             <Button 
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={() => setIsDistributeOpen(true)}
             >
-              Distribute Vouchers
+              Tembak Stok
             </Button>
           </div>
           <CardContent className="p-6">
@@ -144,7 +144,7 @@ export default function OwnerDistribution() {
 
             {/* Distribution History */}
             <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">Distribution History</h3>
+              <h3 className="text-lg font-medium mb-4">Riwayat Distribusi</h3>
               <DataTable
                 data={isLoading ? [] : distributions || []}
                 columns={[
@@ -154,35 +154,35 @@ export default function OwnerDistribution() {
                     cell: (row) => `D-${row.id.toString().padStart(3, '0')}`,
                   },
                   {
-                    header: "Date",
+                    header: "Tanggal",
                     accessorKey: "createdAt",
-                    cell: (row) => new Date(row.createdAt).toLocaleDateString(),
+                    cell: (row) => new Date(row.createdAt).toLocaleDateString('id-ID'),
                   },
                   {
-                    header: "Employee",
+                    header: "Karyawan",
                     accessorKey: (row) => {
                       const employee = employees?.find((e: any) => e.id === row.employeeId);
-                      return employee ? employee.fullName : `Employee #${row.employeeId}`;
+                      return employee ? employee.fullName : `Karyawan #${row.employeeId}`;
                     },
                   },
                   {
-                    header: "Voucher Type",
+                    header: "Nama Barang",
                     accessorKey: (row) => {
                       const voucher = vouchers?.find((v: any) => v.id === row.voucherId);
-                      return voucher ? `${voucher.type} ($${voucher.value})` : `Voucher #${row.voucherId}`;
+                      return voucher ? `${voucher.namaBarang || voucher.type}` : `Voucher #${row.voucherId}`;
                     },
                   },
                   {
-                    header: "Quantity",
+                    header: "Jumlah",
                     accessorKey: "quantity",
                   },
                   {
-                    header: "Total Amount",
+                    header: "Total Harga",
                     accessorKey: "totalPrice",
-                    cell: (row) => `$${row.totalPrice}`,
+                    cell: (row) => `Rp ${parseInt(row.totalPrice).toLocaleString('id-ID')}`,
                   },
                   {
-                    header: "Payment Status",
+                    header: "Status Pembayaran",
                     accessorKey: "paymentStatus",
                     cell: (row) => {
                       let className = "";
@@ -202,13 +202,16 @@ export default function OwnerDistribution() {
                       
                       return (
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${className}`}>
-                          {row.paymentStatus.charAt(0).toUpperCase() + row.paymentStatus.slice(1)}
+                          {row.paymentStatus === "paid" ? "Lunas" : 
+                           row.paymentStatus === "pending" ? "Belum Bayar" : 
+                           row.paymentStatus === "credit" ? "Kredit (30 hari)" : 
+                           row.paymentStatus}
                         </span>
                       );
                     },
                   },
                   {
-                    header: "Actions",
+                    header: "Aksi",
                     accessorKey: (row) => row.id,
                     cell: (row) => (
                       <Button 
@@ -217,7 +220,7 @@ export default function OwnerDistribution() {
                         className="text-green-600 hover:text-green-700 hover:bg-green-50"
                         onClick={() => viewDistributionDetails(row)}
                       >
-                        <Eye className="h-4 w-4 mr-1" /> View
+                        <Eye className="h-4 w-4 mr-1" /> Detail
                       </Button>
                     ),
                   },
@@ -236,9 +239,9 @@ export default function OwnerDistribution() {
       <Dialog open={isDistributeOpen} onOpenChange={setIsDistributeOpen}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
-            <DialogTitle>Distribute Vouchers to Employee</DialogTitle>
+            <DialogTitle>Form Tembak Stok</DialogTitle>
             <DialogDescription>
-              Select an employee and voucher type to distribute vouchers.
+              Pilih karyawan dan barang untuk distribusi stok.
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -249,19 +252,19 @@ export default function OwnerDistribution() {
                   name="employeeId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Select Employee</FormLabel>
+                      <FormLabel>Pilih Karyawan</FormLabel>
                       <Select 
                         onValueChange={(value) => field.onChange(parseInt(value))} 
                         value={field.value.toString()}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select employee" />
+                            <SelectValue placeholder="Pilih karyawan" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {isLoadingEmployees ? (
-                            <div className="p-2 text-center">Loading...</div>
+                            <div className="p-2 text-center">Memuat...</div>
                           ) : employees && employees.length > 0 ? (
                             employees.map((employee: any) => (
                               <SelectItem key={employee.id} value={employee.id.toString()}>
@@ -269,7 +272,7 @@ export default function OwnerDistribution() {
                               </SelectItem>
                             ))
                           ) : (
-                            <div className="p-2 text-center">No employees found</div>
+                            <div className="p-2 text-center">Tidak ada karyawan</div>
                           )}
                         </SelectContent>
                       </Select>
@@ -283,29 +286,29 @@ export default function OwnerDistribution() {
                   name="voucherId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Voucher Type</FormLabel>
+                      <FormLabel>Nama Barang</FormLabel>
                       <Select 
                         onValueChange={(value) => field.onChange(parseInt(value))} 
                         value={field.value.toString()}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select voucher type" />
+                            <SelectValue placeholder="Pilih barang" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {isLoadingVouchers ? (
-                            <div className="p-2 text-center">Loading...</div>
+                            <div className="p-2 text-center">Memuat...</div>
                           ) : vouchers && vouchers.length > 0 ? (
                             vouchers
                               .filter((voucher: any) => voucher.currentStock > 0)
                               .map((voucher: any) => (
                                 <SelectItem key={voucher.id} value={voucher.id.toString()}>
-                                  {voucher.type} - ${voucher.value} ({voucher.currentStock} in stock)
+                                  {voucher.namaBarang || voucher.type} ({voucher.currentStock} stok tersedia)
                                 </SelectItem>
                               ))
                           ) : (
-                            <div className="p-2 text-center">No vouchers found</div>
+                            <div className="p-2 text-center">Tidak ada barang</div>
                           )}
                         </SelectContent>
                       </Select>
@@ -319,7 +322,7 @@ export default function OwnerDistribution() {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel>Jumlah</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -334,7 +337,7 @@ export default function OwnerDistribution() {
                         <p className="text-xs text-gray-500 mt-1">
                           {(() => {
                             const selectedVoucher = vouchers?.find((v: any) => v.id === form.watch("voucherId"));
-                            return selectedVoucher ? `${selectedVoucher.currentStock} available in stock` : '';
+                            return selectedVoucher ? `${selectedVoucher.currentStock} stok tersedia` : '';
                           })()}
                         </p>
                       ) : null}
@@ -347,12 +350,12 @@ export default function OwnerDistribution() {
                   name="unitPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Unit Price (Rp)</FormLabel>
+                      <FormLabel>Harga per Unit (Rp)</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
-                          placeholder="0.00" 
-                          step="0.01" 
+                          placeholder="0" 
+                          step="1" 
                           min="0"
                           onChange={(e) => field.onChange(parseFloat(e.target.value || "0"))}
                           value={field.value || ""}
@@ -368,7 +371,7 @@ export default function OwnerDistribution() {
                   name="totalPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Total Price (Rp)</FormLabel>
+                      <FormLabel>Total Harga (Rp)</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -384,43 +387,20 @@ export default function OwnerDistribution() {
                 
                 <FormField
                   control={form.control}
-                  name="paymentMethod"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Payment Method</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select payment method" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                          <SelectItem value="credit">Credit</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
                   name="paymentStatus"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Status</FormLabel>
+                      <FormLabel>Status Pembayaran</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select payment status" />
+                            <SelectValue placeholder="Pilih status pembayaran" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="paid">Paid</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="credit">Credit (Due in 30 days)</SelectItem>
+                          <SelectItem value="paid">Lunas</SelectItem>
+                          <SelectItem value="pending">Belum Bayar</SelectItem>
+                          <SelectItem value="credit">Kredit (30 hari)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -433,10 +413,10 @@ export default function OwnerDistribution() {
                   name="notes"
                   render={({ field }) => (
                     <FormItem className="sm:col-span-2">
-                      <FormLabel>Notes (Optional)</FormLabel>
+                      <FormLabel>Catatan (Opsional)</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Additional notes about this distribution" 
+                          placeholder="Catatan tambahan tentang distribusi ini" 
                           className="resize-none" 
                           {...field} 
                         />
@@ -453,7 +433,7 @@ export default function OwnerDistribution() {
                   variant="outline" 
                   onClick={() => setIsDistributeOpen(false)}
                 >
-                  Cancel
+                  Batal
                 </Button>
                 <Button 
                   type="submit" 
@@ -463,10 +443,10 @@ export default function OwnerDistribution() {
                   {createDistributionMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                      Processing...
+                      Memproses...
                     </>
                   ) : (
-                    <>Distribute</>
+                    <>Tembak Stok</>
                   )}
                 </Button>
               </DialogFooter>
@@ -479,75 +459,76 @@ export default function OwnerDistribution() {
       <Dialog open={isDistributionDetailsOpen} onOpenChange={setIsDistributionDetailsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Distribution Details</DialogTitle>
+            <DialogTitle>Detail Distribusi</DialogTitle>
           </DialogHeader>
           {selectedDistribution && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Distribution ID</h4>
+                  <h4 className="text-sm font-medium text-gray-500">ID Distribusi</h4>
                   <p className="text-sm">D-{selectedDistribution.id.toString().padStart(3, '0')}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Date</h4>
-                  <p className="text-sm">{new Date(selectedDistribution.createdAt).toLocaleDateString()}</p>
+                  <h4 className="text-sm font-medium text-gray-500">Tanggal</h4>
+                  <p className="text-sm">{new Date(selectedDistribution.createdAt).toLocaleDateString('id-ID')}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Employee</h4>
+                  <h4 className="text-sm font-medium text-gray-500">Karyawan</h4>
                   <p className="text-sm">
                     {(() => {
                       const employee = employees?.find((e: any) => e.id === selectedDistribution.employeeId);
-                      return employee ? employee.fullName : `Employee #${selectedDistribution.employeeId}`;
+                      return employee ? employee.fullName : `Karyawan #${selectedDistribution.employeeId}`;
                     })()}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Voucher Type</h4>
+                  <h4 className="text-sm font-medium text-gray-500">Nama Barang</h4>
                   <p className="text-sm">
                     {(() => {
                       const voucher = vouchers?.find((v: any) => v.id === selectedDistribution.voucherId);
-                      return voucher ? `${voucher.type} ($${voucher.value})` : `Voucher #${selectedDistribution.voucherId}`;
+                      return voucher ? (voucher.namaBarang || voucher.type) : `Barang #${selectedDistribution.voucherId}`;
                     })()}
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Quantity</h4>
+                  <h4 className="text-sm font-medium text-gray-500">Jumlah</h4>
                   <p className="text-sm">{selectedDistribution.quantity}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Unit Price</h4>
-                  <p className="text-sm">${selectedDistribution.unitPrice}</p>
+                  <h4 className="text-sm font-medium text-gray-500">Harga per Unit</h4>
+                  <p className="text-sm">Rp {parseInt(selectedDistribution.unitPrice).toLocaleString('id-ID')}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-500">Total Amount</h4>
-                  <p className="text-sm">${selectedDistribution.totalPrice}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Payment Method</h4>
-                  <p className="text-sm">{selectedDistribution.paymentMethod}</p>
+                  <h4 className="text-sm font-medium text-gray-500">Total Harga</h4>
+                  <p className="text-sm">Rp {parseInt(selectedDistribution.totalPrice).toLocaleString('id-ID')}</p>
                 </div>
                 <div className="col-span-2">
-                  <h4 className="text-sm font-medium text-gray-500">Payment Status</h4>
+                  <h4 className="text-sm font-medium text-gray-500">Status Pembayaran</h4>
                   <div className="mt-1">
                     {(() => {
                       let className = "";
+                      let statusText = "";
                       switch (selectedDistribution.paymentStatus) {
                         case "paid":
                           className = "bg-green-100 text-green-800";
+                          statusText = "Lunas";
                           break;
                         case "pending":
                           className = "bg-yellow-100 text-yellow-800";
+                          statusText = "Belum Bayar";
                           break;
                         case "credit":
                           className = "bg-blue-100 text-blue-800";
+                          statusText = "Kredit (30 hari)";
                           break;
                         default:
                           className = "bg-gray-100 text-gray-800";
+                          statusText = selectedDistribution.paymentStatus;
                       }
                       
                       return (
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${className}`}>
-                          {selectedDistribution.paymentStatus.charAt(0).toUpperCase() + selectedDistribution.paymentStatus.slice(1)}
+                          {statusText}
                         </span>
                       );
                     })()}
@@ -555,7 +536,7 @@ export default function OwnerDistribution() {
                 </div>
                 {selectedDistribution.notes && (
                   <div className="col-span-2">
-                    <h4 className="text-sm font-medium text-gray-500">Notes</h4>
+                    <h4 className="text-sm font-medium text-gray-500">Catatan</h4>
                     <p className="text-sm">{selectedDistribution.notes}</p>
                   </div>
                 )}
@@ -566,19 +547,19 @@ export default function OwnerDistribution() {
                   variant="outline" 
                   onClick={() => setIsDistributionDetailsOpen(false)}
                 >
-                  Close
+                  Tutup
                 </Button>
                 <Button
                   variant="outline"
                   className="border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
                   onClick={() => {
                     toast({
-                      title: "Print Receipt",
-                      description: "Print functionality is coming soon",
+                      title: "Cetak Nota",
+                      description: "Fitur cetak akan segera tersedia",
                     });
                   }}
                 >
-                  Print Receipt
+                  Cetak Nota
                 </Button>
               </div>
             </div>
