@@ -15,6 +15,9 @@ import OfflineVoucherStock from "@/pages/owner/offline-voucher-stock";
 import OwnerDistribution from "@/pages/owner/distribution";
 import OwnerEmployees from "@/pages/owner/employees";
 import OwnerCustomers from "@/pages/owner/customers";
+import OwnerStock from "@/pages/owner/stock-owner";
+import EmployeeStock from "@/pages/owner/employee-stock";
+import CustomerStock from "@/pages/owner/customer-stock";
 
 // Employee pages
 import EmployeeDashboard from "@/pages/employee/dashboard";
@@ -38,6 +41,9 @@ function Router() {
       <ProtectedRoute path="/owner/distribution" component={OwnerDistribution} />
       <ProtectedRoute path="/owner/employees" component={OwnerEmployees} />
       <ProtectedRoute path="/owner/customers" component={OwnerCustomers} />
+      <ProtectedRoute path="/owner/stock-owner" component={OwnerStock} />
+      <ProtectedRoute path="/owner/employee-stock" component={EmployeeStock} />
+      <ProtectedRoute path="/owner/customer-stock" component={CustomerStock} />
       
       {/* Employee routes */}
       <ProtectedRoute path="/employee/dashboard" component={EmployeeDashboard} />
