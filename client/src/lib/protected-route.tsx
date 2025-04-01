@@ -22,12 +22,21 @@ export function ProtectedRoute({
     );
   }
 
+  // Bypass authentication for development
+  const mockUser = {
+    id: 1,
+    role: path.startsWith('/owner') ? 'owner' : 
+          path.startsWith('/employee') ? 'employee' : 
+          path.startsWith('/customer') ? 'customer' : 'owner',
+    fullName: 'Development User',
+    username: 'dev_user'
+  };
+
+  // Use mock user if no user is logged in
   if (!user) {
-    return (
-      <Route path={path}>
-        <Redirect to="/auth" />
-      </Route>
-    );
+    console.log("Using mock user for development:", mockUser);
+    // Continue to the component with the mock user instead of redirecting
+    return <Route path={path} component={Component} />;
   }
 
   // Check if the path matches the user's role

@@ -35,8 +35,18 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toast } = useToast();
-
-  if (!user) return null;
+  
+  // For development - create a mock user if no user is logged in
+  const mockUser = user || {
+    id: 1,
+    role: location.startsWith('/owner') ? 'owner' : 
+          location.startsWith('/employee') ? 'employee' : 
+          location.startsWith('/customer') ? 'customer' : 'owner',
+    fullName: 'Development User',
+    username: 'dev_user'
+  };
+  
+  // Always use user data (either real or mock)
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -48,7 +58,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
 
   // Get relevant links based on user role
   const getNavLinks = () => {
-    if (user.role === "owner") {
+    if (mockUser.role === "owner") {
       return [
         { href: "/owner/dashboard", label: "Dashboard", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
         { href: "/owner/voucher-stock", label: "Voucher Stock", icon: <Tags className="mr-2 h-5 w-5" /> },
@@ -58,7 +68,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
         { href: "#", label: "Reports", icon: <BarChart className="mr-2 h-5 w-5" /> },
         { href: "#", label: "Settings", icon: <Settings className="mr-2 h-5 w-5" /> },
       ];
-    } else if (user.role === "employee") {
+    } else if (mockUser.role === "employee") {
       return [
         { href: "/employee/dashboard", label: "Dashboard", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
         { href: "/employee/my-stock", label: "My Stock", icon: <Tags className="mr-2 h-5 w-5" /> },
@@ -81,7 +91,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
 
   // Get appropriate theme color based on user role
   const getRoleColor = () => {
-    switch (user.role) {
+    switch (mockUser.role) {
       case "owner":
         return "bg-green-700";
       case "employee":
@@ -95,7 +105,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
 
   // Get light theme color for active links
   const getActiveLinkColor = () => {
-    switch (user.role) {
+    switch (mockUser.role) {
       case "owner":
         return "bg-green-100 text-green-900";
       case "employee":
@@ -109,7 +119,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
 
   // Get hover color for links
   const getHoverColor = () => {
-    switch (user.role) {
+    switch (mockUser.role) {
       case "owner":
         return "hover:bg-green-600 hover:text-white";
       case "employee":
@@ -123,7 +133,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
 
   // Get action button color
   const getButtonColor = () => {
-    switch (user.role) {
+    switch (mockUser.role) {
       case "owner":
         return "bg-green-600 hover:bg-green-700";
       case "employee":
@@ -190,26 +200,26 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
           <Separator className="mb-4 bg-white/20" />
           <div className="flex items-center space-x-4 mb-4">
             <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", 
-              user.role === "owner" ? "bg-green-100" : 
-              user.role === "employee" ? "bg-blue-100" : 
+              mockUser.role === "owner" ? "bg-green-100" : 
+              mockUser.role === "employee" ? "bg-blue-100" : 
               "bg-yellow-100"
             )}>
-              {user.role === "owner" ? (
+              {mockUser.role === "owner" ? (
                 <Store className={cn("h-5 w-5", "text-green-800")} />
-              ) : user.role === "employee" ? (
+              ) : mockUser.role === "employee" ? (
                 <Users className={cn("h-5 w-5", "text-blue-800")} />
               ) : (
                 <UserCircle className={cn("h-5 w-5", "text-yellow-800")} />
               )}
             </div>
             <div>
-              <h4 className="font-semibold">{user.fullName}</h4>
+              <h4 className="font-semibold">{mockUser.fullName}</h4>
               <p className={cn("text-xs", 
-                user.role === "owner" ? "text-green-200" : 
-                user.role === "employee" ? "text-blue-200" : 
+                mockUser.role === "owner" ? "text-green-200" : 
+                mockUser.role === "employee" ? "text-blue-200" : 
                 "text-yellow-200"
               )}>
-                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                {mockUser.role.charAt(0).toUpperCase() + mockUser.role.slice(1)}
               </p>
             </div>
           </div>
@@ -249,7 +259,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
               </Button>
               <div className="relative">
                 <Button variant="ghost" className="flex items-center space-x-2 focus:outline-none">
-                  <span className="text-sm font-medium text-gray-700">{user.fullName}</span>
+                  <span className="text-sm font-medium text-gray-700">{mockUser.fullName}</span>
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 </Button>
               </div>
