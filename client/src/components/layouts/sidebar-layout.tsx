@@ -27,6 +27,7 @@ import {
   ChevronUp,
   Wifi,
   WifiOff,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -158,6 +159,11 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
           href: "/owner/settings",
           label: "Pengaturan",
           icon: <Settings className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "/owner/download",
+          label: "Download Project",
+          icon: <Download className="mr-2 h-5 w-5" />,
         },
       ];
     } else if (mockUser.role === "employee") {

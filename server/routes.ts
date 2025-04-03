@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { z } from "zod";
+import { downloadProject } from "./download";
 import {
   insertVoucherSchema,
   insertDistributionSchema,
@@ -415,6 +416,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch transactions" });
     }
   });
+
+  // Download project endpoint
+  app.get("/api/download-project", isOwner, downloadProject);
 
   // Create and return HTTP server
   const httpServer = createServer(app);

@@ -21,6 +21,7 @@ import EmployeeStock from "@/pages/owner/employee-stock";
 import CustomerStock from "@/pages/owner/customer-stock";
 import OwnerReports from "@/pages/owner/reports";
 import OwnerSettings from "@/pages/owner/settings";
+import DownloadProject from "@/pages/download-project";
 
 // Employee pages
 import EmployeeDashboard from "@/pages/employee/dashboard";
@@ -58,6 +59,7 @@ function Router() {
       <ProtectedRoute path="/owner/customer-stock" component={CustomerStock} />
       <ProtectedRoute path="/owner/reports" component={OwnerReports} />
       <ProtectedRoute path="/owner/settings" component={OwnerSettings} />
+      <ProtectedRoute path="/owner/download" component={DownloadProject} />
 
       {/* Employee routes */}
       <ProtectedRoute
