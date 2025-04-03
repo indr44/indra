@@ -1,4 +1,3 @@
-# desdig
 # desdig.net
 
 ## Description
@@ -10,11 +9,3 @@ A digital distribution platform for managing vouchers, customers, and employees.
 - Voucher distribution
 - Stock management
 - Reporting
-# desdig.net
-# desdig.net
-# desdig.net
-# indra
-# indra
-# indra
-# indra
-# indra
