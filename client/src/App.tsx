@@ -19,6 +19,8 @@ import OwnerCustomers from "@/pages/owner/customers";
 import OwnerStock from "@/pages/owner/stock-owner";
 import EmployeeStock from "@/pages/owner/employee-stock";
 import CustomerStock from "@/pages/owner/customer-stock";
+import OwnerReports from "@/pages/owner/reports";
+import OwnerSettings from "@/pages/owner/settings";
 
 // Employee pages
 import EmployeeDashboard from "@/pages/employee/dashboard";
@@ -54,6 +56,8 @@ function Router() {
       <ProtectedRoute path="/owner/stock-owner" component={OwnerStock} />
       <ProtectedRoute path="/owner/employee-stock" component={EmployeeStock} />
       <ProtectedRoute path="/owner/customer-stock" component={CustomerStock} />
+      <ProtectedRoute path="/owner/reports" component={OwnerReports} />
+      <ProtectedRoute path="/owner/settings" component={OwnerSettings} />
 
       {/* Employee routes */}
       <ProtectedRoute
@@ -77,7 +81,30 @@ function Router() {
 function App() {
   // Initialize Tempo Devtools
   useEffect(() => {
-    // Tempo initialization removed to fix errors
+    // Initialize Tempo Devtools if available
+    if (typeof window !== "undefined" && window.NEXT_PUBLIC_TEMPO) {
+      try {
+        const { TempoDevtools } = require("tempo-devtools");
+        TempoDevtools.init();
+      } catch (error) {
+        console.error("Failed to initialize Tempo Devtools:", error);
+      }
+    }
+
+    // Set up localStorage persistence for development
+    const saveStateToLocalStorage = () => {
+      // Save important app state to localStorage before page unloads
+      // This helps with data persistence during development
+      if (typeof window !== "undefined") {
+        // You can add specific state saving logic here
+        // For example: localStorage.setItem('appState', JSON.stringify(someState));
+      }
+    };
+
+    window.addEventListener("beforeunload", saveStateToLocalStorage);
+    return () => {
+      window.removeEventListener("beforeunload", saveStateToLocalStorage);
+    };
   }, []);
 
   return (

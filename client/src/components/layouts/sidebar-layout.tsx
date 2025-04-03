@@ -1,20 +1,24 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/use-auth";
-import { 
-  LayoutDashboard, 
-  Tags, 
-  Share, 
-  Users, 
-  BarChart, 
-  Settings, 
-  LogOut, 
-  Menu, 
-  Bell, 
-  ChevronDown, 
-  Store, 
-  ShoppingCart, 
+import {
+  LayoutDashboard,
+  Tags,
+  Share,
+  Users,
+  BarChart,
+  Settings,
+  LogOut,
+  Menu,
+  Bell,
+  ChevronDown,
+  Store,
+  ShoppingCart,
   TicketIcon,
   History,
   UserCircle,
@@ -22,7 +26,7 @@ import {
   Loader2, // Added for loading animation
   ChevronUp,
   Wifi,
-  WifiOff, 
+  WifiOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,17 +43,21 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toast } = useToast();
-  
+
   // For development - create a mock user if no user is logged in
   const mockUser = user || {
     id: 1,
-    role: location.startsWith('/owner') ? 'owner' : 
-          location.startsWith('/employee') ? 'employee' : 
-          location.startsWith('/customer') ? 'customer' : 'owner',
-    fullName: 'Development User',
-    username: 'dev_user'
+    role: location.startsWith("/owner")
+      ? "owner"
+      : location.startsWith("/employee")
+        ? "employee"
+        : location.startsWith("/customer")
+          ? "customer"
+          : "owner",
+    fullName: "Development User",
+    username: "dev_user",
   };
-  
+
   // Always use user data (either real or mock)
 
   const handleLogout = () => {
@@ -63,68 +71,153 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
   const [voucherStockOpen, setVoucherStockOpen] = useState(false);
   const [dataUserOpen, setDataUserOpen] = useState(false);
   const [dataStockOpen, setDataStockOpen] = useState(false);
-  
+
   // Get relevant links based on user role
   const getNavLinks = () => {
     if (mockUser.role === "owner") {
       return [
-        { href: "/owner/dashboard", label: "Dasbor", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
-        { 
-          isSubmenu: true, 
-          label: "Stok Voucher", 
+        {
+          href: "/owner/dashboard",
+          label: "Dasbor",
+          icon: <LayoutDashboard className="mr-2 h-5 w-5" />,
+        },
+        {
+          isSubmenu: true,
+          label: "Stok Voucher",
           icon: <Tags className="mr-2 h-5 w-5" />,
           open: voucherStockOpen,
           toggle: () => setVoucherStockOpen(!voucherStockOpen),
           items: [
-            { href: "/owner/voucher-stock", label: "Stok Voucher Online", icon: <Wifi className="mr-2 h-4 w-4" /> },
-            { href: "/owner/offline-voucher-stock", label: "Stok Voucher Offline", icon: <WifiOff className="mr-2 h-4 w-4" /> },
-          ]
+            {
+              href: "/owner/voucher-stock",
+              label: "Stok Voucher Online",
+              icon: <Wifi className="mr-2 h-4 w-4" />,
+            },
+            {
+              href: "/owner/offline-voucher-stock",
+              label: "Stok Voucher Offline",
+              icon: <WifiOff className="mr-2 h-4 w-4" />,
+            },
+          ],
         },
-        { href: "/owner/distribution", label: "Distribusi", icon: <Share className="mr-2 h-5 w-5" /> },
+        {
+          href: "/owner/distribution",
+          label: "Distribusi",
+          icon: <Share className="mr-2 h-5 w-5" />,
+        },
         // Data User submenu with two options: Karyawan and Pelanggan
-        { 
-          isSubmenu: true, 
-          label: "Data User", 
+        {
+          isSubmenu: true,
+          label: "Data User",
           icon: <Users className="mr-2 h-5 w-5" />,
           open: dataUserOpen,
           toggle: () => setDataUserOpen(!dataUserOpen),
           items: [
-            { href: "/owner/employees", label: "Karyawan", icon: <UserCircle className="mr-2 h-4 w-4" /> },
-            { href: "/owner/customers", label: "Pelanggan", icon: <Users className="mr-2 h-4 w-4" /> },
-          ]
+            {
+              href: "/owner/employees",
+              label: "Karyawan",
+              icon: <UserCircle className="mr-2 h-4 w-4" />,
+            },
+            {
+              href: "/owner/customers",
+              label: "Pelanggan",
+              icon: <Users className="mr-2 h-4 w-4" />,
+            },
+          ],
         },
-        { 
-          isSubmenu: true, 
-          label: "Data Stok", 
+        {
+          isSubmenu: true,
+          label: "Data Stok",
           icon: <Tags className="mr-2 h-5 w-5" />,
           open: dataStockOpen,
           toggle: () => setDataStockOpen(!dataStockOpen),
           items: [
-            { href: "/owner/stock-owner", label: "Stok Owner", icon: <Store className="mr-2 h-4 w-4" /> },
-            { href: "/owner/employee-stock", label: "Stok Karyawan", icon: <UserCircle className="mr-2 h-4 w-4" /> },
-            { href: "/owner/customer-stock", label: "Stok Pelanggan", icon: <Users className="mr-2 h-4 w-4" /> },
-          ]
+            {
+              href: "/owner/stock-owner",
+              label: "Stok Owner",
+              icon: <Store className="mr-2 h-4 w-4" />,
+            },
+            {
+              href: "/owner/employee-stock",
+              label: "Stok Karyawan",
+              icon: <UserCircle className="mr-2 h-4 w-4" />,
+            },
+            {
+              href: "/owner/customer-stock",
+              label: "Stok Pelanggan",
+              icon: <Users className="mr-2 h-4 w-4" />,
+            },
+          ],
         },
-        { href: "#", label: "Laporan", icon: <BarChart className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Pengaturan", icon: <Settings className="mr-2 h-5 w-5" /> },
+        {
+          href: "/owner/reports",
+          label: "Laporan",
+          icon: <BarChart className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "/owner/settings",
+          label: "Pengaturan",
+          icon: <Settings className="mr-2 h-5 w-5" />,
+        },
       ];
     } else if (mockUser.role === "employee") {
       return [
-        { href: "/employee/dashboard", label: "Dasbor", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
-        { href: "/employee/my-stock", label: "Stok Saya", icon: <Tags className="mr-2 h-5 w-5" /> },
+        {
+          href: "/employee/dashboard",
+          label: "Dasbor",
+          icon: <LayoutDashboard className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "/employee/my-stock",
+          label: "Stok Saya",
+          icon: <Tags className="mr-2 h-5 w-5" />,
+        },
         // Additional employee links
-        { href: "#", label: "Penjualan", icon: <ShoppingCart className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Pelanggan", icon: <Users className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Sinkronisasi Data", icon: <RefreshCw className="mr-2 h-5 w-5" /> },
+        {
+          href: "#",
+          label: "Penjualan",
+          icon: <ShoppingCart className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "#",
+          label: "Pelanggan",
+          icon: <Users className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "#",
+          label: "Sinkronisasi Data",
+          icon: <RefreshCw className="mr-2 h-5 w-5" />,
+        },
       ];
-    } else { // customer
+    } else {
+      // customer
       return [
-        { href: "/customer/dashboard", label: "Dasbor", icon: <LayoutDashboard className="mr-2 h-5 w-5" /> },
+        {
+          href: "/customer/dashboard",
+          label: "Dasbor",
+          icon: <LayoutDashboard className="mr-2 h-5 w-5" />,
+        },
         // Additional customer links
-        { href: "#", label: "Voucher Saya", icon: <TicketIcon className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Beli Voucher", icon: <ShoppingCart className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Riwayat Transaksi", icon: <History className="mr-2 h-5 w-5" /> },
-        { href: "#", label: "Profil", icon: <UserCircle className="mr-2 h-5 w-5" /> },
+        {
+          href: "#",
+          label: "Voucher Saya",
+          icon: <TicketIcon className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "#",
+          label: "Beli Voucher",
+          icon: <ShoppingCart className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "#",
+          label: "Riwayat Transaksi",
+          icon: <History className="mr-2 h-5 w-5" />,
+        },
+        {
+          href: "#",
+          label: "Profil",
+          icon: <UserCircle className="mr-2 h-5 w-5" />,
+        },
       ];
     }
   };
@@ -198,7 +291,9 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
         className={cn(
           "text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-20",
           roleColor,
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          isMobileMenuOpen
+            ? "translate-x-0"
+            : "-translate-x-full md:translate-x-0",
         )}
       >
         <div className="flex items-center space-x-4 px-4 mb-8">
@@ -207,9 +302,9 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
         </div>
 
         <nav className="space-y-1">
-          {links.map((link, index) => 
+          {links.map((link, index) =>
             link.isSubmenu ? (
-              <Collapsible 
+              <Collapsible
                 key={index}
                 open={link.open}
                 onOpenChange={link.toggle}
@@ -219,7 +314,7 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
                   <button
                     className={cn(
                       "flex items-center justify-between w-full py-2.5 px-4 rounded transition duration-200 text-white",
-                      hoverColor
+                      hoverColor,
                     )}
                   >
                     <div className="flex items-center">
@@ -251,8 +346,10 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
                       <a
                         className={cn(
                           "block py-2 px-4 rounded transition duration-200",
-                          location === item.href ? activeLinkColor : "text-white",
-                          hoverColor
+                          location === item.href
+                            ? activeLinkColor
+                            : "text-white",
+                          hoverColor,
                         )}
                       >
                         {item.icon}
@@ -281,25 +378,30 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
                   className={cn(
                     "block py-2.5 px-4 rounded transition duration-200",
                     location === link.href ? activeLinkColor : "text-white",
-                    hoverColor
+                    hoverColor,
                   )}
                 >
                   {link.icon}
                   {link.label}
                 </a>
               </Link>
-            )
+            ),
           )}
         </nav>
 
         <div className="absolute bottom-0 w-full px-4 py-4">
           <Separator className="mb-4 bg-white/20" />
           <div className="flex items-center space-x-4 mb-4">
-            <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", 
-              mockUser.role === "owner" ? "bg-green-100" : 
-              mockUser.role === "employee" ? "bg-blue-100" : 
-              "bg-yellow-100"
-            )}>
+            <div
+              className={cn(
+                "h-10 w-10 rounded-full flex items-center justify-center",
+                mockUser.role === "owner"
+                  ? "bg-green-100"
+                  : mockUser.role === "employee"
+                    ? "bg-blue-100"
+                    : "bg-yellow-100",
+              )}
+            >
               {mockUser.role === "owner" ? (
                 <Store className={cn("h-5 w-5", "text-green-800")} />
               ) : mockUser.role === "employee" ? (
@@ -310,14 +412,21 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
             </div>
             <div>
               <h4 className="font-semibold">{mockUser.fullName}</h4>
-              <p className={cn("text-xs", 
-                mockUser.role === "owner" ? "text-green-200" : 
-                mockUser.role === "employee" ? "text-blue-200" : 
-                "text-yellow-200"
-              )}>
-                {mockUser.role === "owner" ? "Pemilik" : 
-                 mockUser.role === "employee" ? "Karyawan" : 
-                 "Pelanggan"}
+              <p
+                className={cn(
+                  "text-xs",
+                  mockUser.role === "owner"
+                    ? "text-green-200"
+                    : mockUser.role === "employee"
+                      ? "text-blue-200"
+                      : "text-yellow-200",
+                )}
+              >
+                {mockUser.role === "owner"
+                  ? "Pemilik"
+                  : mockUser.role === "employee"
+                    ? "Karyawan"
+                    : "Pelanggan"}
               </p>
             </div>
           </div>
@@ -326,7 +435,11 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
             disabled={logoutMutation.isPending}
             className={cn("w-full text-white", buttonColor)}
           >
-            {logoutMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
+            {logoutMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="mr-2 h-4 w-4" />
+            )}
             Keluar
           </Button>
         </div>
@@ -351,13 +464,21 @@ export default function SidebarLayout({ children, title }: SidebarLayoutProps) {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-gray-500 hover:text-gray-700 focus:outline-none relative">
+              <Button
+                variant="ghost"
+                className="text-gray-500 hover:text-gray-700 focus:outline-none relative"
+              >
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
               </Button>
               <div className="relative">
-                <Button variant="ghost" className="flex items-center space-x-2 focus:outline-none">
-                  <span className="text-sm font-medium text-gray-700">{mockUser.fullName}</span>
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-2 focus:outline-none"
+                >
+                  <span className="text-sm font-medium text-gray-700">
+                    {mockUser.fullName}
+                  </span>
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 </Button>
               </div>
