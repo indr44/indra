@@ -1,18 +1,15 @@
 import { useState } from "react";
 import SidebarLayout from "@/components/layouts/sidebar-layout";
-import { 
-  Card, 
-  CardContent 
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -25,11 +22,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Plus, 
-  Edit, 
-  Trash2 
-} from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -39,13 +32,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -87,8 +80,16 @@ const voucherSchema = z.object({
 const voucherCodeSchema = z.object({
   username: z.string().min(1, "Username wajib diisi"),
   password: z.string().min(1, "Password wajib diisi"),
-  status: z.enum(["Belum Terjual", "Terjual", "Retur"]).default("Belum Terjual"),
+  status: z
+    .enum(["Belum Terjual", "Terjual", "Retur"])
+    .default("Belum Terjual"),
   tanggalAktif: z.string().min(1, "Tanggal aktif wajib diisi"),
+});
+
+// Schema validasi untuk tambah stok
+const addStockSchema = z.object({
+  voucherId: z.number().min(1, "Pilih barang terlebih dahulu"),
+  quantity: z.coerce.number().min(1, "Jumlah stok minimal 1"),
 });
 
 export default function OfflineVoucherStock() {
@@ -103,7 +104,7 @@ export default function OfflineVoucherStock() {
       terjual: 5,
       terjualRp: 250000,
       retur: 2,
-      returRp: 100000
+      returRp: 100000,
     },
     {
       id: 2,
@@ -114,7 +115,7 @@ export default function OfflineVoucherStock() {
       terjual: 12,
       terjualRp: 1200000,
       retur: 0,
-      returRp: 0
+      returRp: 0,
     },
     {
       id: 3,
@@ -125,10 +126,10 @@ export default function OfflineVoucherStock() {
       terjual: 20,
       terjualRp: 500000,
       retur: 5,
-      returRp: 125000
-    }
+      returRp: 125000,
+    },
   ]);
-  
+
   const [dataVouchers, setDataVouchers] = useState<DataVoucher[]>([
     {
       id: 1,
@@ -137,7 +138,7 @@ export default function OfflineVoucherStock() {
       password: "pass123",
       status: "Belum Terjual",
       tanggalAktif: "2025-04-01",
-      tanggalJual: null
+      tanggalJual: null,
     },
     {
       id: 2,
@@ -146,7 +147,7 @@ export default function OfflineVoucherStock() {
       password: "pass124",
       status: "Terjual",
       tanggalAktif: "2025-04-01",
-      tanggalJual: "2025-04-02"
+      tanggalJual: "2025-04-02",
     },
     {
       id: 3,
@@ -155,13 +156,17 @@ export default function OfflineVoucherStock() {
       password: "passB1",
       status: "Belum Terjual",
       tanggalAktif: "2025-04-01",
-      tanggalJual: null
-    }
+      tanggalJual: null,
+    },
   ]);
 
   // Menghapus state showDataVoucher karena tidak perlu menampilkan tabel data voucher
-  const [selectedVoucher, setSelectedVoucher] = useState<StockVoucher | null>(null);
-  const [selectedVoucherId, setSelectedVoucherId] = useState<number | null>(null);
+  const [selectedVoucher, setSelectedVoucher] = useState<StockVoucher | null>(
+    null,
+  );
+  const [selectedVoucherId, setSelectedVoucherId] = useState<number | null>(
+    null,
+  );
   const [selectedCodeId, setSelectedCodeId] = useState<number | null>(null);
   const [isAddVoucherOpen, setIsAddVoucherOpen] = useState(false);
   const [isAddVoucherCodeOpen, setIsAddVoucherCodeOpen] = useState(false);
@@ -169,18 +174,16 @@ export default function OfflineVoucherStock() {
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [stockHistoryData, setStockHistoryData] = useState<{
-    date: string;
-    belumTerjual: number;
-    terjual: number;
-    retur: number;
-    stokAkhir: number;
-  }[]>([
-    { date: "2025-04-01", belumTerjual: 10, terjual: 2, retur: 1, stokAkhir: 7 },
-    { date: "2025-04-02", belumTerjual: 12, terjual: 3, retur: 1, stokAkhir: 8 },
-    { date: "2025-04-03", belumTerjual: 15, terjual: 5, retur: 2, stokAkhir: 8 },
-  ]);
-  
+  const [stockHistoryData, setStockHistoryData] = useState<
+    {
+      date: string;
+      belumTerjual: number;
+      terjual: number;
+      retur: number;
+      stokAkhir: number;
+    }[]
+  >([]);
+
   // Form untuk tambah voucher
   const voucherForm = useForm<z.infer<typeof voucherSchema>>({
     resolver: zodResolver(voucherSchema),
@@ -201,10 +204,22 @@ export default function OfflineVoucherStock() {
     },
   });
 
+  // Form untuk tambah stok
+  const addStockForm = useForm<z.infer<typeof addStockSchema>>({
+    resolver: zodResolver(addStockSchema),
+    defaultValues: {
+      voucherId: 0,
+      quantity: 1,
+    },
+  });
+
   // Handle submit tambah voucher
   const onSubmitVoucher = (values: z.infer<typeof voucherSchema>) => {
     const newVoucher: StockVoucher = {
-      id: stockVouchers.length + 1,
+      id:
+        stockVouchers.length > 0
+          ? Math.max(...stockVouchers.map((v) => v.id)) + 1
+          : 1,
       namaBarang: values.namaBarang,
       hargaBarang: values.hargaBarang,
       belumTerjual: 0,
@@ -214,13 +229,13 @@ export default function OfflineVoucherStock() {
       retur: 0,
       returRp: 0,
       stokAkhir: 0,
-      stokAkhirRp: 0
+      stokAkhirRp: 0,
     };
-    
+
     setStockVouchers([...stockVouchers, newVoucher]);
     setIsAddVoucherOpen(false);
     voucherForm.reset();
-    
+
     toast({
       title: "Berhasil",
       description: "Voucher baru telah ditambahkan",
@@ -230,26 +245,32 @@ export default function OfflineVoucherStock() {
   // Handle submit tambah kode voucher
   const onSubmitVoucherCode = (values: z.infer<typeof voucherCodeSchema>) => {
     if (!selectedVoucher) return;
-    
+
     const newVoucherCode: DataVoucher = {
-      id: dataVouchers.length + 1,
+      id:
+        dataVouchers.length > 0
+          ? Math.max(...dataVouchers.map((v) => v.id)) + 1
+          : 1,
       voucherId: selectedVoucher.id,
       username: values.username,
       password: values.password,
       status: values.status,
       tanggalAktif: values.tanggalAktif,
-      tanggalJual: values.status === "Terjual" ? new Date().toISOString().slice(0, 10) : null
+      tanggalJual:
+        values.status === "Terjual"
+          ? new Date().toISOString().slice(0, 10)
+          : null,
     };
-    
+
     setDataVouchers([...dataVouchers, newVoucherCode]);
-    
+
     // Update jumlah voucher di stok
-    const updatedStockVouchers = stockVouchers.map(stock => {
+    const updatedStockVouchers = stockVouchers.map((stock) => {
       if (stock.id === selectedVoucher.id) {
         let newBelumTerjual = stock.belumTerjual;
         let newTerjual = stock.terjual;
         let newRetur = stock.retur;
-        
+
         if (values.status === "Belum Terjual") {
           newBelumTerjual += 1;
         } else if (values.status === "Terjual") {
@@ -257,11 +278,11 @@ export default function OfflineVoucherStock() {
         } else if (values.status === "Retur") {
           newRetur += 1;
         }
-        
+
         // Calculate stokAkhir using the formula: belumTerjual - terjual - retur = stokAkhir
         const newStokAkhir = newBelumTerjual - newTerjual - newRetur;
         const newStokAkhirRp = newStokAkhir * stock.hargaBarang;
-        
+
         return {
           ...stock,
           belumTerjual: newBelumTerjual,
@@ -271,19 +292,92 @@ export default function OfflineVoucherStock() {
           retur: newRetur,
           returRp: newRetur * stock.hargaBarang,
           stokAkhir: newStokAkhir,
-          stokAkhirRp: newStokAkhirRp
+          stokAkhirRp: newStokAkhirRp,
         };
       }
       return stock;
     });
-    
+
     setStockVouchers(updatedStockVouchers);
     setIsAddVoucherCodeOpen(false);
     voucherCodeForm.reset();
-    
+
     toast({
       title: "Berhasil",
       description: "Kode voucher telah ditambahkan",
+    });
+  };
+
+  // Handle submit tambah stok
+  const onSubmitAddStock = (values: z.infer<typeof addStockSchema>) => {
+    const selectedStock = stockVouchers.find(
+      (stock) => stock.id === values.voucherId,
+    );
+    if (!selectedStock) return;
+
+    // Update stock voucher
+    const updatedStockVouchers = stockVouchers.map((stock) => {
+      if (stock.id === values.voucherId) {
+        const newBelumTerjual = stock.belumTerjual + values.quantity;
+        const newBelumTerjualRp = newBelumTerjual * stock.hargaBarang;
+        // Calculate stokAkhir using the formula: belumTerjual - terjual - retur = stokAkhir
+        const newStokAkhir = newBelumTerjual - stock.terjual - stock.retur;
+        const newStokAkhirRp = newStokAkhir * stock.hargaBarang;
+
+        return {
+          ...stock,
+          belumTerjual: newBelumTerjual,
+          belumTerjualRp: newBelumTerjualRp,
+          stokAkhir: newStokAkhir,
+          stokAkhirRp: newStokAkhirRp,
+        };
+      }
+      return stock;
+    });
+
+    setStockVouchers(updatedStockVouchers);
+
+    // Add to history data
+    const today = new Date().toISOString().slice(0, 10);
+    const existingHistoryIndex = stockHistoryData.findIndex(
+      (item) => item.date === today,
+    );
+
+    if (existingHistoryIndex >= 0) {
+      // Update existing history entry
+      const updatedHistory = [...stockHistoryData];
+      const entry = updatedHistory[existingHistoryIndex];
+      updatedHistory[existingHistoryIndex] = {
+        ...entry,
+        belumTerjual: entry.belumTerjual + values.quantity,
+        stokAkhir: entry.stokAkhir + values.quantity,
+      };
+      setStockHistoryData(updatedHistory);
+    } else {
+      // Create new history entry
+      const updatedStock = updatedStockVouchers.find(
+        (stock) => stock.id === values.voucherId,
+      );
+      if (updatedStock) {
+        setStockHistoryData([
+          ...stockHistoryData,
+          {
+            date: today,
+            belumTerjual: values.quantity,
+            terjual: 0,
+            retur: 0,
+            stokAkhir: values.quantity,
+          },
+        ]);
+      }
+    }
+
+    setIsAddStockOpen(false);
+    addStockForm.reset();
+
+    toast({
+      title: "Berhasil",
+      description: `${values.quantity} stok berhasil ditambahkan ke ${selectedStock.namaBarang}`,
     });
   };
 
@@ -299,19 +393,62 @@ export default function OfflineVoucherStock() {
   const handleDelete = () => {
     if (selectedVoucherId) {
       // Hapus voucher
-      setStockVouchers(stockVouchers.filter(v => v.id !== selectedVoucherId));
+      setStockVouchers(stockVouchers.filter((v) => v.id !== selectedVoucherId));
       // Hapus semua kode voucher terkait
-      setDataVouchers(dataVouchers.filter(v => v.voucherId !== selectedVoucherId));
-      
+      setDataVouchers(
+        dataVouchers.filter((v) => v.voucherId !== selectedVoucherId),
+      );
+
       toast({
         title: "Berhasil Dihapus",
         description: "Voucher telah dihapus",
       });
     }
-    
+
     setIsDeleteDialogOpen(false);
     setSelectedVoucherId(null);
     setSelectedCodeId(null);
+  };
+
+  // Function to show history dialog
+  const showHistoryDialog = (voucher: StockVoucher) => {
+    setSelectedVoucher(voucher);
+    setSelectedVoucherId(voucher.id);
+
+    // Generate some history data if empty
+    if (stockHistoryData.length === 0) {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const twoDaysAgo = new Date(today);
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+      setStockHistoryData([
+        {
+          date: twoDaysAgo.toISOString().slice(0, 10),
+          belumTerjual: 10,
+          terjual: 2,
+          retur: 1,
+          stokAkhir: 7,
+        },
+        {
+          date: yesterday.toISOString().slice(0, 10),
+          belumTerjual: 12,
+          terjual: 3,
+          retur: 1,
+          stokAkhir: 8,
+        },
+        {
+          date: today.toISOString().slice(0, 10),
+          belumTerjual: 15,
+          terjual: 5,
+          retur: 2,
+          stokAkhir: 8,
+        },
+      ]);
+    }
+
+    setIsHistoryOpen(true);
   };
 
   return (
@@ -319,15 +456,17 @@ export default function OfflineVoucherStock() {
       <div className="space-y-6">
         <Card>
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="font-semibold text-gray-800">Stok Voucher Offline</h2>
+            <h2 className="font-semibold text-gray-800">
+              Stok Voucher Offline
+            </h2>
             <div className="flex space-x-2">
-              <Button 
+              <Button
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => setIsAddStockOpen(true)}
               >
                 <Plus className="mr-2 h-4 w-4" /> Tambah Stok
               </Button>
-              <Button 
+              <Button
                 className="bg-green-600 hover:bg-green-700 text-white"
                 onClick={() => setIsAddVoucherOpen(true)}
               >
@@ -343,25 +482,20 @@ export default function OfflineVoucherStock() {
                   header: "Nama Barang",
                   accessorKey: "namaBarang",
                   cell: (row) => (
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="p-0 h-auto font-normal text-blue-600 hover:text-blue-800"
-                      onClick={() => {
-                        // Set selected voucher and show history dialog
-                        setSelectedVoucher(row);
-                        setSelectedVoucherId(row.id);
-                        setIsHistoryOpen(true);
-                      }}
+                      onClick={() => showHistoryDialog(row)}
                     >
                       {row.namaBarang}
                     </Button>
-                  )
+                  ),
                 },
                 {
                   header: "Harga Barang",
                   accessorKey: "hargaBarang",
                   cell: (row) => (
-                    <span>Rp {row.hargaBarang.toLocaleString('id-ID')}</span>
+                    <span>Rp {row.hargaBarang.toLocaleString("id-ID")}</span>
                   ),
                 },
                 {
@@ -372,7 +506,7 @@ export default function OfflineVoucherStock() {
                   header: "Belum Terjual (Rp)",
                   accessorKey: "belumTerjualRp",
                   cell: (row) => (
-                    <span>Rp {row.belumTerjualRp.toLocaleString('id-ID')}</span>
+                    <span>Rp {row.belumTerjualRp.toLocaleString("id-ID")}</span>
                   ),
                 },
                 {
@@ -383,7 +517,7 @@ export default function OfflineVoucherStock() {
                   header: "Terjual (Rp)",
                   accessorKey: "terjualRp",
                   cell: (row) => (
-                    <span>Rp {row.terjualRp.toLocaleString('id-ID')}</span>
+                    <span>Rp {row.terjualRp.toLocaleString("id-ID")}</span>
                   ),
                 },
                 {
@@ -394,7 +528,7 @@ export default function OfflineVoucherStock() {
                   header: "Retur (Rp)",
                   accessorKey: "returRp",
                   cell: (row) => (
-                    <span>Rp {row.returRp.toLocaleString('id-ID')}</span>
+                    <span>Rp {row.returRp.toLocaleString("id-ID")}</span>
                   ),
                 },
                 {
@@ -402,44 +536,40 @@ export default function OfflineVoucherStock() {
                   accessorKey: "stokAkhir",
                   cell: (row) => {
                     // Calculate stokAkhir on the fly using the formula
-                    const stokAkhir = row.belumTerjual - row.terjual - row.retur;
-                    return (
-                      <span>{stokAkhir}</span>
-                    );
-                  }
+                    const stokAkhir =
+                      row.belumTerjual - row.terjual - row.retur;
+                    return <span>{stokAkhir}</span>;
+                  },
                 },
                 {
                   header: "Stok Akhir (Rp)",
                   accessorKey: "stokAkhirRp",
                   cell: (row) => {
                     // Calculate stokAkhirRp on the fly
-                    const stokAkhir = row.belumTerjual - row.terjual - row.retur;
+                    const stokAkhir =
+                      row.belumTerjual - row.terjual - row.retur;
                     const stokAkhirRp = stokAkhir * row.hargaBarang;
                     return (
-                      <span>Rp {stokAkhirRp.toLocaleString('id-ID')}</span>
+                      <span>Rp {stokAkhirRp.toLocaleString("id-ID")}</span>
                     );
-                  }
+                  },
                 },
                 {
                   header: "Opsi",
                   accessorKey: "id",
                   cell: (row) => (
                     <div className="flex space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => {
-                          setSelectedVoucher(row);
-                          setSelectedVoucherId(row.id);
-                          setIsHistoryOpen(true);
-                        }}
+                        onClick={() => showHistoryDialog(row)}
                       >
                         Detail
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={() => {
                           setSelectedVoucherId(row.id);
@@ -470,7 +600,10 @@ export default function OfflineVoucherStock() {
             </DialogDescription>
           </DialogHeader>
           <Form {...voucherForm}>
-            <form onSubmit={voucherForm.handleSubmit(onSubmitVoucher)} className="space-y-6">
+            <form
+              onSubmit={voucherForm.handleSubmit(onSubmitVoucher)}
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 gap-6">
                 <FormField
                   control={voucherForm.control}
@@ -493,11 +626,13 @@ export default function OfflineVoucherStock() {
                     <FormItem>
                       <FormLabel>Harga Barang (Rp)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="0" 
-                          {...field} 
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -507,10 +642,17 @@ export default function OfflineVoucherStock() {
               </div>
 
               <div className="flex justify-end space-x-4">
-                <Button type="button" variant="outline" onClick={() => setIsAddVoucherOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddVoucherOpen(false)}
+                >
                   Batal
                 </Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
+                <Button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
                   Simpan
                 </Button>
               </div>
@@ -520,7 +662,10 @@ export default function OfflineVoucherStock() {
       </Dialog>
 
       {/* Dialog Tambah Kode Voucher */}
-      <Dialog open={isAddVoucherCodeOpen} onOpenChange={setIsAddVoucherCodeOpen}>
+      <Dialog
+        open={isAddVoucherCodeOpen}
+        onOpenChange={setIsAddVoucherCodeOpen}
+      >
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Tambah Kode Voucher</DialogTitle>
@@ -529,7 +674,10 @@ export default function OfflineVoucherStock() {
             </DialogDescription>
           </DialogHeader>
           <Form {...voucherCodeForm}>
-            <form onSubmit={voucherCodeForm.handleSubmit(onSubmitVoucherCode)} className="space-y-6">
+            <form
+              onSubmit={voucherCodeForm.handleSubmit(onSubmitVoucherCode)}
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 gap-6">
                 <FormField
                   control={voucherCodeForm.control}
@@ -575,10 +723,17 @@ export default function OfflineVoucherStock() {
               </div>
 
               <div className="flex justify-end space-x-4">
-                <Button type="button" variant="outline" onClick={() => setIsAddVoucherCodeOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddVoucherCodeOpen(false)}
+                >
                   Batal
                 </Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
+                <Button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
                   Simpan
                 </Button>
               </div>
@@ -588,17 +743,23 @@ export default function OfflineVoucherStock() {
       </Dialog>
 
       {/* Dialog Konfirmasi Hapus */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak
+              dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>Batal</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
               onClick={handleDelete}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
@@ -617,103 +778,113 @@ export default function OfflineVoucherStock() {
               Pilih voucher dan tambahkan stok
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            {stockVouchers.length > 0 ? (
-              <div className="space-y-4">
-                <Label>Pilih Barang</Label>
-                <Select
-                  value={selectedVoucherId?.toString() || ""}
-                  onValueChange={(value) => setSelectedVoucherId(parseInt(value))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih barang" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stockVouchers.map((stock) => (
-                      <SelectItem key={stock.id} value={stock.id.toString()}>
-                        {stock.namaBarang} - Rp {stock.hargaBarang.toLocaleString('id-ID')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          <Form {...addStockForm}>
+            <form
+              onSubmit={addStockForm.handleSubmit(onSubmitAddStock)}
+              className="space-y-6"
+            >
+              {stockVouchers.length > 0 ? (
+                <div className="space-y-4">
+                  <FormField
+                    control={addStockForm.control}
+                    name="voucherId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pilih Barang</FormLabel>
+                        <Select
+                          value={field.value ? field.value.toString() : ""}
+                          onValueChange={(value) =>
+                            field.onChange(parseInt(value))
+                          }
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih barang" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {stockVouchers.map((stock) => (
+                              <SelectItem
+                                key={stock.id}
+                                value={stock.id.toString()}
+                              >
+                                {stock.namaBarang} - Rp{" "}
+                                {stock.hargaBarang.toLocaleString("id-ID")}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Jumlah Stok</Label>
-                    <Input 
-                      type="number" 
-                      placeholder="1" 
-                      min="1"
-                      defaultValue="1"
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={addStockForm.control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Jumlah Stok</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="1"
+                              min="1"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseInt(e.target.value) || 1)
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                  </div>
-                  <div>
-                    <Label>Total Harga</Label>
-                    <Input 
-                      type="text" 
-                      disabled
-                      value={selectedVoucherId 
-                        ? `Rp ${(stockVouchers.find(s => s.id === selectedVoucherId)?.hargaBarang || 0).toLocaleString('id-ID')}`
-                        : "Rp 0"
-                      }
-                    />
+                    <div>
+                      <Label>Total Harga</Label>
+                      <Input
+                        type="text"
+                        disabled
+                        value={(() => {
+                          const voucherId = addStockForm.watch("voucherId");
+                          const quantity = addStockForm.watch("quantity") || 0;
+                          const selectedVoucher = stockVouchers.find(
+                            (s) => s.id === voucherId,
+                          );
+                          if (selectedVoucher) {
+                            return `Rp ${(selectedVoucher.hargaBarang * quantity).toLocaleString("id-ID")}`;
+                          }
+                          return "Rp 0";
+                        })()}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                Tidak ada barang tersedia. Tambahkan barang terlebih dahulu.
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsAddStockOpen(false)}>
-              Batal
-            </Button>
-            <Button 
-              type="button" 
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => {
-                if (selectedVoucherId) {
-                  // Add stock logic
-                  const updatedStockVouchers = stockVouchers.map(stock => {
-                    if (stock.id === selectedVoucherId) {
-                      const newBelumTerjual = stock.belumTerjual + 1;
-                      const newBelumTerjualRp = newBelumTerjual * stock.hargaBarang;
-                      // Calculate stokAkhir using the formula: belumTerjual - terjual - retur = stokAkhir
-                      const newStokAkhir = newBelumTerjual - stock.terjual - stock.retur;
-                      const newStokAkhirRp = newStokAkhir * stock.hargaBarang;
-                      
-                      return {
-                        ...stock,
-                        belumTerjual: newBelumTerjual,
-                        belumTerjualRp: newBelumTerjualRp,
-                        stokAkhir: newStokAkhir,
-                        stokAkhirRp: newStokAkhirRp
-                      };
-                    }
-                    return stock;
-                  });
-                  
-                  setStockVouchers(updatedStockVouchers);
-                  setIsAddStockOpen(false);
-                  
-                  toast({
-                    title: "Berhasil",
-                    description: "Stok berhasil ditambah",
-                  });
-                } else {
-                  toast({
-                    title: "Pilih Barang",
-                    description: "Silahkan pilih barang yang akan ditambah stoknya",
-                  });
-                }
-              }}
-              disabled={!selectedVoucherId}
-            >
-              Tambah Stok
-            </Button>
-          </DialogFooter>
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  Tidak ada barang tersedia. Tambahkan barang terlebih dahulu.
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddStockOpen(false)}
+                >
+                  Batal
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={!addStockForm.watch("voucherId")}
+                >
+                  Tambah Stok
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
@@ -729,28 +900,49 @@ export default function OfflineVoucherStock() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border px-4 py-2 text-left">Tanggal</th>
-                  <th className="border px-4 py-2 text-center">Belum Terjual</th>
-                  <th className="border px-4 py-2 text-center">Terjual</th>
-                  <th className="border px-4 py-2 text-center">Retur</th>
-                  <th className="border px-4 py-2 text-center">Stok Akhir</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stockHistoryData.map((item, index) => (
-                  <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                    <td className="border px-4 py-2">{new Date(item.date).toLocaleDateString('id-ID')}</td>
-                    <td className="border px-4 py-2 text-center">{item.belumTerjual}</td>
-                    <td className="border px-4 py-2 text-center">{item.terjual}</td>
-                    <td className="border px-4 py-2 text-center">{item.retur}</td>
-                    <td className="border px-4 py-2 text-center">{item.stokAkhir}</td>
+            {stockHistoryData.length > 0 ? (
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border px-4 py-2 text-left">Tanggal</th>
+                    <th className="border px-4 py-2 text-center">
+                      Belum Terjual
+                    </th>
+                    <th className="border px-4 py-2 text-center">Terjual</th>
+                    <th className="border px-4 py-2 text-center">Retur</th>
+                    <th className="border px-4 py-2 text-center">Stok Akhir</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stockHistoryData.map((item, index) => (
+                    <tr
+                      key={index}
+                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                    >
+                      <td className="border px-4 py-2">
+                        {new Date(item.date).toLocaleDateString("id-ID")}
+                      </td>
+                      <td className="border px-4 py-2 text-center">
+                        {item.belumTerjual}
+                      </td>
+                      <td className="border px-4 py-2 text-center">
+                        {item.terjual}
+                      </td>
+                      <td className="border px-4 py-2 text-center">
+                        {item.retur}
+                      </td>
+                      <td className="border px-4 py-2 text-center">
+                        {item.stokAkhir}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                Tidak ada data histori tersedia.
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" onClick={() => setIsHistoryOpen(false)}>

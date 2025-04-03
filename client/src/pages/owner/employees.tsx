@@ -12,9 +12,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, Dialog } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  Dialog,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Pencil, Trash2, UserPlus, MapPin, Phone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -95,7 +115,10 @@ export default function OwnerEmployees() {
   // Create employee mutation
   const createEmployeeMutation = useMutation({
     mutationFn: async (data: EmployeeFormValues) => {
-      const res = await apiRequest("POST", "/api/users", data);
+      const res = await apiRequest("POST", "/api/users", {
+        ...data,
+        role: "employee",
+      });
       return await res.json();
     },
     onSuccess: () => {
@@ -173,7 +196,9 @@ export default function OwnerEmployees() {
 
   // Handle employee deletion with confirmation
   const handleDeleteEmployee = (employee: any) => {
-    if (confirm(`Anda yakin ingin menghapus karyawan "${employee.fullName}"?`)) {
+    if (
+      confirm(`Anda yakin ingin menghapus karyawan "${employee.fullName}"?`)
+    ) {
       deleteEmployeeMutation.mutate(employee.id);
     }
   };
@@ -183,7 +208,7 @@ export default function OwnerEmployees() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-3xl font-bold tracking-tight">Data Karyawan</h2>
-          <Button 
+          <Button
             onClick={openCreateDialog}
             className="bg-green-600 hover:bg-green-700"
           >
@@ -195,7 +220,10 @@ export default function OwnerEmployees() {
         <Card>
           <CardContent className="p-6">
             <div className="text-sm text-gray-500 mb-4">
-              <p>Kelola data karyawan termasuk username, password, dan informasi kontak.</p>
+              <p>
+                Kelola data karyawan termasuk username, password, dan informasi
+                kontak.
+              </p>
             </div>
 
             {/* Employee Table */}
@@ -209,14 +237,14 @@ export default function OwnerEmployees() {
                     cell: (row) => (
                       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                         {row.profileImage ? (
-                          <img 
-                            src={row.profileImage} 
-                            alt={row.fullName} 
+                          <img
+                            src={row.profileImage}
+                            alt={row.fullName}
                             className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="text-gray-500 flex items-center justify-center w-full h-full">
-                            {row.fullName?.charAt(0).toUpperCase() || 'U'}
+                            {row.fullName?.charAt(0).toUpperCase() || "U"}
                           </div>
                         )}
                       </div>
@@ -259,7 +287,9 @@ export default function OwnerEmployees() {
                         {row.location ? (
                           <>
                             <MapPin className="h-4 w-4 mr-1 text-red-500" />
-                            <span className="text-blue-600 hover:underline">Lihat Map</span>
+                            <span className="text-blue-600 hover:underline">
+                              Lihat Map
+                            </span>
                           </>
                         ) : (
                           <span className="text-gray-400">-</span>
@@ -272,17 +302,17 @@ export default function OwnerEmployees() {
                     accessorKey: (row) => row.id,
                     cell: (row) => (
                       <div className="flex space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           onClick={() => openEditDialog(row)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={() => handleDeleteEmployee(row)}
                         >
@@ -303,15 +333,19 @@ export default function OwnerEmployees() {
       </div>
 
       {/* Employee Form Dialog */}
-      <Dialog open={isEmployeeDialogOpen} onOpenChange={setIsEmployeeDialogOpen}>
+      <Dialog
+        open={isEmployeeDialogOpen}
+        onOpenChange={setIsEmployeeDialogOpen}
+      >
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? "Edit Karyawan" : "Tambah Karyawan Baru"}</DialogTitle>
+            <DialogTitle>
+              {isEditMode ? "Edit Karyawan" : "Tambah Karyawan Baru"}
+            </DialogTitle>
             <DialogDescription>
-              {isEditMode 
+              {isEditMode
                 ? "Edit informasi karyawan yang sudah ada."
-                : "Tambahkan karyawan baru dengan mengisi formulir di bawah ini."
-              }
+                : "Tambahkan karyawan baru dengan mengisi formulir di bawah ini."}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -321,7 +355,7 @@ export default function OwnerEmployees() {
                   <TabsTrigger value="account">Akun</TabsTrigger>
                   <TabsTrigger value="profile">Profil & Kontak</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="account" className="space-y-4 mt-4">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
@@ -337,25 +371,33 @@ export default function OwnerEmployees() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{isEditMode ? "Password Baru (opsional)" : "Password*"}</FormLabel>
+                          <FormLabel>
+                            {isEditMode
+                              ? "Password Baru (opsional)"
+                              : "Password*"}
+                          </FormLabel>
                           <FormControl>
-                            <Input 
-                              type="password" 
-                              placeholder={isEditMode ? "Kosongkan jika tidak ingin mengubah" : "password"} 
-                              {...field} 
+                            <Input
+                              type="password"
+                              placeholder={
+                                isEditMode
+                                  ? "Kosongkan jika tidak ingin mengubah"
+                                  : "password"
+                              }
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="fullName"
@@ -369,7 +411,7 @@ export default function OwnerEmployees() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="role"
@@ -377,7 +419,12 @@ export default function OwnerEmployees() {
                         <FormItem>
                           <FormLabel>Role*</FormLabel>
                           <FormControl>
-                            <Input value="employee" readOnly className="bg-gray-100" {...field} />
+                            <Input
+                              value="employee"
+                              readOnly
+                              className="bg-gray-100"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -385,7 +432,7 @@ export default function OwnerEmployees() {
                     />
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="profile" className="space-y-4 mt-4">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField
@@ -395,7 +442,10 @@ export default function OwnerEmployees() {
                         <FormItem>
                           <FormLabel>URL Foto Profil</FormLabel>
                           <FormControl>
-                            <Input placeholder="https://example.com/image.jpg" {...field} />
+                            <Input
+                              placeholder="https://example.com/image.jpg"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                           <div className="text-xs text-gray-500 mt-1">
@@ -404,7 +454,7 @@ export default function OwnerEmployees() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="whatsapp"
@@ -418,7 +468,7 @@ export default function OwnerEmployees() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="address"
@@ -426,17 +476,17 @@ export default function OwnerEmployees() {
                         <FormItem className="sm:col-span-2">
                           <FormLabel>Alamat</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="Alamat lengkap karyawan" 
-                              className="resize-none" 
-                              {...field} 
+                            <Textarea
+                              placeholder="Alamat lengkap karyawan"
+                              className="resize-none"
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="location"
@@ -444,9 +494,9 @@ export default function OwnerEmployees() {
                         <FormItem className="sm:col-span-2">
                           <FormLabel>Lokasi (Google Maps URL)</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="https://maps.google.com/?q=..." 
-                              {...field} 
+                            <Input
+                              placeholder="https://maps.google.com/?q=..."
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -459,21 +509,25 @@ export default function OwnerEmployees() {
                   </div>
                 </TabsContent>
               </Tabs>
-              
+
               <DialogFooter>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setIsEmployeeDialogOpen(false)}
                 >
                   Batal
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="bg-green-600 hover:bg-green-700"
-                  disabled={createEmployeeMutation.isPending || updateEmployeeMutation.isPending}
+                  disabled={
+                    createEmployeeMutation.isPending ||
+                    updateEmployeeMutation.isPending
+                  }
                 >
-                  {createEmployeeMutation.isPending || updateEmployeeMutation.isPending ? (
+                  {createEmployeeMutation.isPending ||
+                  updateEmployeeMutation.isPending ? (
                     <>Menyimpan...</>
                   ) : (
                     <>{isEditMode ? "Perbarui" : "Simpan"}</>

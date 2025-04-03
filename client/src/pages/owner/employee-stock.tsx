@@ -4,7 +4,12 @@ import SidebarLayout from "@/components/layouts/sidebar-layout";
 import { DataTable } from "@/components/ui/data-table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Eye } from "lucide-react";
 
 export default function EmployeeStock() {
@@ -24,7 +29,8 @@ export default function EmployeeStock() {
           initialStock: 80,
           addedStock: 40,
           sales: 25,
-          returns: 3
+          returns: 3,
+          isOnline: true,
         },
         {
           id: 2,
@@ -33,10 +39,11 @@ export default function EmployeeStock() {
           initialStock: 60,
           addedStock: 30,
           sales: 15,
-          returns: 2
-        }
+          returns: 2,
+          isOnline: false,
+        },
       ];
-    }
+    },
   });
 
   // Fetch employee stock details
@@ -54,7 +61,7 @@ export default function EmployeeStock() {
           initialStock: 40,
           addedStock: 20,
           sales: 12,
-          returns: 1
+          returns: 1,
         },
         {
           id: 2,
@@ -64,10 +71,10 @@ export default function EmployeeStock() {
           initialStock: 40,
           addedStock: 20,
           sales: 13,
-          returns: 2
-        }
+          returns: 2,
+        },
       ];
-    }
+    },
   });
 
   const viewDetails = (employee: any) => {
@@ -85,17 +92,31 @@ export default function EmployeeStock() {
               data={isLoadingEmployees ? [] : employees || []}
               columns={[
                 {
+                  header: "Status",
+                  accessorKey: "status",
+                  cell: (row) => {
+                    const isOnline = row.isOnline || false;
+                    return (
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${isOnline ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                      >
+                        {isOnline ? "Online" : "Offline"}
+                      </span>
+                    );
+                  },
+                },
+                {
                   header: "Nama User",
                   accessorKey: "fullName",
                   cell: (row) => (
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="p-0 h-auto font-normal text-blue-600 hover:text-blue-800"
                       onClick={() => viewDetails(row)}
                     >
                       {row.fullName}
                     </Button>
-                  )
+                  ),
                 },
                 {
                   header: "Stok Awal",
@@ -115,7 +136,8 @@ export default function EmployeeStock() {
                 },
                 {
                   header: "Stok Akhir",
-                  accessorKey: (row) => row.initialStock + row.addedStock - row.sales - row.returns,
+                  accessorKey: (row) =>
+                    row.initialStock + row.addedStock - row.sales - row.returns,
                 },
                 {
                   header: "Opsi",
@@ -144,11 +166,9 @@ export default function EmployeeStock() {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>
-              Detail Stok {selectedEmployee?.fullName}
-            </DialogTitle>
+            <DialogTitle>Detail Stok {selectedEmployee?.fullName}</DialogTitle>
           </DialogHeader>
-          
+
           <div className="mt-4">
             <DataTable
               data={isLoadingDetails ? [] : employeeStockDetails || []}
@@ -164,7 +184,7 @@ export default function EmployeeStock() {
                 {
                   header: "Harga Barang",
                   accessorKey: "price",
-                  cell: (row) => `Rp ${row.price.toLocaleString('id-ID')}`,
+                  cell: (row) => `Rp ${row.price.toLocaleString("id-ID")}`,
                 },
                 {
                   header: "Stok Awal",
@@ -184,7 +204,8 @@ export default function EmployeeStock() {
                 },
                 {
                   header: "Stok Akhir",
-                  accessorKey: (row) => row.initialStock + row.addedStock - row.sales - row.returns,
+                  accessorKey: (row) =>
+                    row.initialStock + row.addedStock - row.sales - row.returns,
                 },
                 {
                   header: "Opsi",
